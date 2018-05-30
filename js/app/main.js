@@ -1,21 +1,34 @@
-let app = new PIXI.Application({ width: 800, height: 800 });
-document.body.appendChild(app.view);
-let rocket;
-PIXI.loader
-    .add("images/rocket.png")
-    .load(setup);
-function setup() {
-    rocket = new PIXI.Sprite(PIXI.loader.resources["images/rocket.png"].texture);
-    rocket.y = 200;
-    app.stage.addChild(rocket);
-    app.ticker.add(delta => gameLoop(delta));
-}
-let time = 0;
-function gameLoop(delta) {
-    time += delta;
-    rocket.x = 400 + 400 * Math.sin(time / 73);
-    rocket.rotation += 0.01;
-    let scale = 0.5 + Math.sin(time / 100) * 0.25;
-    rocket.scale = new PIXI.Point(scale, scale);
-}
+define(["require", "exports", "./gameEngine"], function (require, exports, gameEngine_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    let app = new PIXI.Application({ width: 800, height: 800 });
+    document.body.appendChild(app.view);
+    PIXI.loader.add("images/rocket.png");
+    PIXI.loader.load(setup);
+    function setup() {
+        function gameLoop(delta) {
+            game.cycle(delta);
+            time += delta;
+        }
+        let game = new gameEngine_1.default(app);
+        app.ticker.add(delta => gameLoop(delta));
+    }
+    var time = 0;
+    class Thing {
+        get status() {
+            return this._status;
+        }
+        set status(value) {
+            this._status = value;
+            console.log("someone chnged status");
+        }
+    }
+    Thing.STATUS = {
+        OFF: "off",
+        ON: "on"
+    };
+    let x = new Thing();
+    x.status == Thing.STATUS.ON;
+    x.status = Thing.STATUS.OFF;
+});
 //# sourceMappingURL=main.js.map

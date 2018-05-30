@@ -1,35 +1,43 @@
 ///<reference types="pixi.js"/>
-
+import gameEngine from "./gameEngine";
 let app = new PIXI.Application({width: 800, height: 800});
-
 //Add the canvas that Pixi automatically created for you to the HTML document
 document.body.appendChild(app.view);
-
-let rocket: PIXI.Sprite;
-
+PIXI.loader.add("images/rocket.png");
 //load an image and run the `setup` function when it's done
-PIXI.loader
-  .add("images/rocket.png")
-  .load(setup);
+PIXI.loader.load(setup);
 
 //This `setup` function will run when the image has loaded
 function setup() {
-
-  //Create the cat sprite
-  rocket = new PIXI.Sprite(PIXI.loader.resources["images/rocket.png"].texture);
-  rocket.y = 200;
-  
-  //Add the cat to the stage
-  app.stage.addChild(rocket);
-
+  function gameLoop(delta: number) {
+    game.cycle(delta);
+    time += delta;
+  }
+  let game = new gameEngine(app);
   app.ticker.add(delta => gameLoop(delta));
 }
+var time = 0;
 
-let time = 0;
-function gameLoop(delta: number) {
-    time += delta;
-    rocket.x = 400 + 400 * Math.sin(time / 73);
-    rocket.rotation += 0.01;
-    let scale = 0.5 + Math.sin(time / 100) * 0.25;
-    rocket.scale = new PIXI.Point(scale, scale);
+class Thing {
+
+  private _status: string;
+
+  static readonly STATUS = {
+    OFF: "off",
+    ON: "on"
+  }
+
+  // "on" or "off"
+  get status(): string {
+    return this._status;
+  }
+
+  set status(value: string) {
+    this._status = value;
+    console.log("someone chnged status")
+  }
 }
+
+let x = new Thing();
+x.status == Thing.STATUS.ON;
+x.status = Thing.STATUS.OFF;
