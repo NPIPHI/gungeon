@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "target": "es6",
+        "outDir": "./js/app/",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "moduleResolution": "node"
+    },
+    "files": [
+        "./ts/main.ts"
+    ]
+}
