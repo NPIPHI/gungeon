@@ -1,7 +1,8 @@
 ///<reference types="pixi.js"/>
+import {rectangle} from "./shapes";
 import keyboard from "./keyboard";
 import gameObject from "./gameObject";
-import rectangle from "./rectangle";
+//import rectangle from "./rectangle";
 export class gameEngine{
     mouse: PIXI.Sprite;
     constructor(app: PIXI.Application){
@@ -57,6 +58,7 @@ export class gameEngine{
         new wall(0,0,50,720);
         new wall(0,670,1280,50);
         new wall(1230,0,50,720);
+        new wall(600,0,30,600);
     }
 };
 
@@ -79,7 +81,7 @@ class player extends gameObject{
         this.keyboardManage(deltaTime);
         this.sprite.position.x+=this.mov.x*deltaTime;
         this.sprite.position.y+=this.mov.y*deltaTime;
-        this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
+        this.hitbox = this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
         this.collision(deltaTime);
         this.mov.set(0,0);
         if(this.guns[this.currentGun-1].automatic){
@@ -175,8 +177,7 @@ class bullet extends gameObject{
     update(deltaTime: number){
         this.sprite.x += this.speed*Math.cos(this.heading)*deltaTime;
         this.sprite.y += this.speed*Math.sin(this.heading)*deltaTime;
-        this.hitbox.x = this.sprite.x;
-        this.hitbox.y = this.sprite.y;
+        this.hitbox = this.hitbox.translateAbsolute(this.sprite.x,this.sprite.y);
         walls.forEach(r => {
             if(this.hitbox.intersects(r)){
                 this.destroy();
@@ -219,9 +220,12 @@ class gun{
     shotCooldown: number = 0; //time untill can shoot again
     counter: fractionCounter; //numerator is currentLoad, denomenator is current rounds
     automatic: boolean; //if fire can be held down
+    reloadProgress: progressBar;
     constructor(type: number){
         this.getTypePropeties(type);
         this.counter = new fractionCounter(1200, 630, this.currentLoad,this.currentRounds, true);
+        this.reloadProgress = new progressBar(0,0,40,this.reloadTime);
+        this.reloadProgress.hide();
     }
     getTypePropeties(type: number){
         switch(type){
@@ -269,9 +273,12 @@ class gun{
         if(this.shotCooldown>0){
             this.shotCooldown-=deltaTime;
         }
+        this.reloadProgress.setPointer(this.reloadProg);
+        this.reloadProgress.setPosition(p1.sprite.position.x,p1.sprite.position.y-20);
     }
     reload(){
-        if(this.currentRounds>=0&&this.currentLoad!=this.capacity){
+        if(this.currentRounds>=0&&this.currentLoad!=this.capacity&&this.currentRounds>0){
+            this.reloadProgress.show();
             this.reloading = true;
         }
     }
@@ -287,6 +294,7 @@ class gun{
         }
         this.currentRounds+=this.currentLoad;
         this.counter.setValue(this.currentLoad,this.currentRounds);
+        this.reloadProgress.hide();
     }
     refill(){
         this.reloading = false;
@@ -318,12 +326,11 @@ class wall{
             }
             {
             let bufferTexture: PIXI.Texture = wall.getWallTexture();
-            let bufferSprite: PIXI.Sprite = new PIXI.Sprite(new PIXI.Texture(bufferTexture.baseTexture,new PIXI.Rectangle(bufferTexture.frame.x,bufferTexture.frame.y,Math.min(w-n*64,bufferTexture.frame.width),20)));
+            let bufferSprite: PIXI.Sprite = new PIXI.Sprite(new PIXI.Texture(bufferTexture.baseTexture,new PIXI.Rectangle(bufferTexture.frame.x,bufferTexture.frame.y,Math.min(w-(n*64+32),bufferTexture.frame.width),20)));
             bufferSprite.x=x+n*64+32;
             bufferSprite.y=y+h-20;
             backGroundImage.addChild(bufferSprite);
             }
-
         }
         walls.push(new rectangle(x,y,w,h));
     }
@@ -549,6 +556,62 @@ class fractionCounter extends UIObject{
         this.numerator.remove();
         this.denomenator.remove();
         UIImage.removeChild(this.line);
+    }
+}
+
+
+class progressBar extends UIObject{
+    x: number;
+    y: number;
+    line: PIXI.Sprite;
+    lineTexture: PIXI.Texture = PIXI.loader.resources["images/UIElements.json"].textures["whiteLine.png"];
+    pointer: PIXI.Sprite;
+    limit: number;
+    length: number;
+    pos: number; //between 0 and limit
+    constructor(x: number, y: number, length: number, limit: number){
+        super();
+        this.line = new PIXI.Sprite(new PIXI.Texture(this.lineTexture.baseTexture,new PIXI.Rectangle(this.lineTexture.frame.x,this.lineTexture.frame.y,Math.min(length,this.lineTexture.width),3)));
+        this.pointer = new PIXI.Sprite(PIXI.loader.resources["images/UIElements.json"].textures["pointer.png"]);
+        this.pointer.position.x = x;
+        this.pointer.position.y = y;
+        this.line.position.x=x;
+        this.line.position.y=y+13;
+        this.limit = limit;
+        this.pos = 0;
+        this.length = length;
+        this.x =x;
+        this.y =y;
+        this.setPointer(0);
+        UIImage.addChild(this.line);
+        UIImage.addChild(this.pointer);
+    }
+    setPointer(position: number){
+        this.pos = position;
+        this.pointer.position.x = ((this.length-3)*this.pos/this.limit)+this.x-3;
+    }
+    setPosition(x: number, y: number){
+        this.line.position.x+= x-this.x;
+        this.line.position.y+= y-this.y;
+        this.pointer.position.x+= x-this.x;
+        this.pointer.position.y+= y-this.y;
+        this.x = x;
+        this.y = y;
+    }
+    getBounds(){
+        return new rectangle(0,0,0,0);
+    }
+    remove(){
+        UIImage.removeChild(this.line);
+        UIImage.removeChild(this.pointer);
+    }
+    hide(){
+        this.line.visible = false;
+        this.pointer.visible = false;
+    }
+    show(){
+        this.line.visible = true;
+        this.pointer.visible = true;
     }
 }
 

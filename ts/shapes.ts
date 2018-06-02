@@ -1,11 +1,19 @@
 
 
-export default class rectangle{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+abstract class shape{
+    constructor(){
+    }
+    static getAngle(p1: PIXI.Point, p2: PIXI.Point):number{
+        return Math.atan2(p2.y-p1.y, p2.x-p1.x);
+    }
+}
+export class rectangle extends shape{
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
     constructor(x: number, y: number, width: number, height: number){
+        super();
         this.x = x;
         this.y = y;
         this.width = width;
@@ -57,15 +65,7 @@ export default class rectangle{
                 (th <= ty || th >= ry));
 
     }
-    translateAbsolute(x: number, y:number){
-        this.x = x;
-        this.y = y;
-    }
-    translateAbsolutePoint(pos: PIXI.Point){
-        this.x = pos.x;
-        this.y = pos.y;
-    }
-    static getAngle(p1: PIXI.Point, p2: PIXI.Point):number{
-        return Math.atan2(p2.y-p1.y, p2.x-p1.x);
+    translateAbsolute(x: number, y:number):rectangle{
+        return new rectangle(x,y, this.width,this.height);
     }
 }

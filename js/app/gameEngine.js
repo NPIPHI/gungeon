@@ -1,4 +1,4 @@
-define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], function (require, exports, keyboard_1, gameObject_1, rectangle_1) {
+define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], function (require, exports, shapes_1, keyboard_1, gameObject_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class gameEngine {
@@ -55,6 +55,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             new wall(0, 0, 50, 720);
             new wall(0, 670, 1280, 50);
             new wall(1230, 0, 50, 720);
+            new wall(600, 0, 30, 600);
         }
     }
     exports.gameEngine = gameEngine;
@@ -63,7 +64,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
         constructor(x, y) {
             super();
             this.mov = new PIXI.Point(0, 0);
-            this.hitbox = new rectangle_1.default(0, 0, 40, 40);
+            this.hitbox = new shapes_1.rectangle(0, 0, 40, 40);
             this.movSpeed = 0.25;
             this.guns = Array();
             this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage("images/playerSmile.png"));
@@ -77,7 +78,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             this.keyboardManage(deltaTime);
             this.sprite.position.x += this.mov.x * deltaTime;
             this.sprite.position.y += this.mov.y * deltaTime;
-            this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
+            this.hitbox = this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
             this.collision(deltaTime);
             this.mov.set(0, 0);
             if (this.guns[this.currentGun - 1].automatic) {
@@ -156,7 +157,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             this.sprite = new PIXI.Sprite(this.getBulletType(typeIndex));
             this.sprite.x = x;
             this.sprite.y = y;
-            this.hitbox = new rectangle_1.default(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height);
+            this.hitbox = new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height);
             this.heading = heading;
             this.dammage = dammage;
             this.speed = speed;
@@ -167,8 +168,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
         update(deltaTime) {
             this.sprite.x += this.speed * Math.cos(this.heading) * deltaTime;
             this.sprite.y += this.speed * Math.sin(this.heading) * deltaTime;
-            this.hitbox.x = this.sprite.x;
-            this.hitbox.y = this.sprite.y;
+            this.hitbox = this.hitbox.translateAbsolute(this.sprite.x, this.sprite.y);
             walls.forEach(r => {
                 if (this.hitbox.intersects(r)) {
                     this.destroy();
@@ -199,6 +199,8 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             this.shotCooldown = 0;
             this.getTypePropeties(type);
             this.counter = new fractionCounter(1200, 630, this.currentLoad, this.currentRounds, true);
+            this.reloadProgress = new progressBar(0, 0, 40, this.reloadTime);
+            this.reloadProgress.hide();
         }
         getTypePropeties(type) {
             switch (type) {
@@ -220,7 +222,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             if (!this.reloading) {
                 if (this.currentLoad > 0) {
                     if (this.shotCooldown <= 0) {
-                        let angle = rectangle_1.default.getAngle(new PIXI.Point(p1.sprite.position.x + p1.sprite.width / 2, p1.sprite.position.y + p1.sprite.height / 2), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                        let angle = shapes_1.rectangle.getAngle(new PIXI.Point(p1.sprite.position.x + p1.sprite.width / 2, p1.sprite.position.y + p1.sprite.height / 2), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                         new bullet(p1.sprite.x + ((p1.sprite.width / 2) + this.barrelLength) * Math.cos(angle) + p1.sprite.width / 2, p1.sprite.y + ((p1.sprite.height / 2) + this.barrelLength) * Math.sin(angle) + p1.sprite.height / 2, angle, 1, 5, 1);
                         this.shotCooldown = this.fireRate;
                         this.currentLoad--;
@@ -247,9 +249,12 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             if (this.shotCooldown > 0) {
                 this.shotCooldown -= deltaTime;
             }
+            this.reloadProgress.setPointer(this.reloadProg);
+            this.reloadProgress.setPosition(p1.sprite.position.x, p1.sprite.position.y - 20);
         }
         reload() {
-            if (this.currentRounds >= 0 && this.currentLoad != this.capacity) {
+            if (this.currentRounds >= 0 && this.currentLoad != this.capacity && this.currentRounds > 0) {
+                this.reloadProgress.show();
                 this.reloading = true;
             }
         }
@@ -266,6 +271,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             }
             this.currentRounds += this.currentLoad;
             this.counter.setValue(this.currentLoad, this.currentRounds);
+            this.reloadProgress.hide();
         }
         refill() {
             this.reloading = false;
@@ -294,13 +300,13 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
                 }
                 {
                     let bufferTexture = wall.getWallTexture();
-                    let bufferSprite = new PIXI.Sprite(new PIXI.Texture(bufferTexture.baseTexture, new PIXI.Rectangle(bufferTexture.frame.x, bufferTexture.frame.y, Math.min(w - n * 64, bufferTexture.frame.width), 20)));
+                    let bufferSprite = new PIXI.Sprite(new PIXI.Texture(bufferTexture.baseTexture, new PIXI.Rectangle(bufferTexture.frame.x, bufferTexture.frame.y, Math.min(w - (n * 64 + 32), bufferTexture.frame.width), 20)));
                     bufferSprite.x = x + n * 64 + 32;
                     bufferSprite.y = y + h - 20;
                     backGroundImage.addChild(bufferSprite);
                 }
             }
-            walls.push(new rectangle_1.default(x, y, w, h));
+            walls.push(new shapes_1.rectangle(x, y, w, h));
         }
         static getCelingTexture() {
             if (Math.random() < 0.33) {
@@ -465,7 +471,7 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             });
         }
         getBounds() {
-            return new rectangle_1.default(this.x, this.y, this.getWidth(false), 15);
+            return new shapes_1.rectangle(this.x, this.y, this.getWidth(false), 15);
         }
         remove() {
             this.sprites.forEach(spr => {
@@ -505,12 +511,59 @@ define(["require", "exports", "./keyboard", "./gameObject", "./rectangle"], func
             this.calculatePositions();
         }
         getBounds() {
-            return new rectangle_1.default(this.x, this.y, this.width, 39);
+            return new shapes_1.rectangle(this.x, this.y, this.width, 39);
         }
         remove() {
             this.numerator.remove();
             this.denomenator.remove();
             UIImage.removeChild(this.line);
+        }
+    }
+    class progressBar extends UIObject {
+        constructor(x, y, length, limit) {
+            super();
+            this.lineTexture = PIXI.loader.resources["images/UIElements.json"].textures["whiteLine.png"];
+            this.line = new PIXI.Sprite(new PIXI.Texture(this.lineTexture.baseTexture, new PIXI.Rectangle(this.lineTexture.frame.x, this.lineTexture.frame.y, Math.min(length, this.lineTexture.width), 3)));
+            this.pointer = new PIXI.Sprite(PIXI.loader.resources["images/UIElements.json"].textures["pointer.png"]);
+            this.pointer.position.x = x;
+            this.pointer.position.y = y;
+            this.line.position.x = x;
+            this.line.position.y = y + 13;
+            this.limit = limit;
+            this.pos = 0;
+            this.length = length;
+            this.x = x;
+            this.y = y;
+            this.setPointer(0);
+            UIImage.addChild(this.line);
+            UIImage.addChild(this.pointer);
+        }
+        setPointer(position) {
+            this.pos = position;
+            this.pointer.position.x = ((this.length - 3) * this.pos / this.limit) + this.x - 3;
+        }
+        setPosition(x, y) {
+            this.line.position.x += x - this.x;
+            this.line.position.y += y - this.y;
+            this.pointer.position.x += x - this.x;
+            this.pointer.position.y += y - this.y;
+            this.x = x;
+            this.y = y;
+        }
+        getBounds() {
+            return new shapes_1.rectangle(0, 0, 0, 0);
+        }
+        remove() {
+            UIImage.removeChild(this.line);
+            UIImage.removeChild(this.pointer);
+        }
+        hide() {
+            this.line.visible = false;
+            this.pointer.visible = false;
+        }
+        show() {
+            this.line.visible = true;
+            this.pointer.visible = true;
         }
     }
     let pixi;

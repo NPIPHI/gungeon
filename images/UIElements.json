@@ -88,9 +88,17 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
 	"sourceSize": {"w":15,"h":15}
 },
+"pointer.png":
+{
+	"frame": {"x":156,"y":0,"w":9,"h":12},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":12},
+	"sourceSize": {"w":9,"h":12}
+},
 "whiteLine.png":
 {
-	"frame": {"x":156,"y":0,"w":100,"h":3},
+	"frame": {"x":0,"y":15,"w":100,"h":3},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":3},
@@ -101,8 +109,8 @@
 	"version": "1.0",
 	"image": "UIElements.png",
 	"format": "RGBA8888",
-	"size": {"w":256,"h":15},
+	"size": {"w":165,"h":18},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:4c466725ca75de15870d8c944380f6e8:12a75c91ed6b3e79faf94a11dabfdbbf:341576581b5d6dad21b5015694e81212$"
+	"smartupdate": "$TexturePacker:SmartUpdate:94dcd38e6383152411119665e5a214a5:c49878c56c273ee6ccc0e1117229c63f:341576581b5d6dad21b5015694e81212$"
 }
 }
