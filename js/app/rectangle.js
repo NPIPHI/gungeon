@@ -58,6 +58,9 @@ define(["require", "exports"], function (require, exports) {
             this.x = pos.x;
             this.y = pos.y;
         }
+        static getAngle(p1, p2) {
+            return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        }
     }
     exports.default = rectangle;
 });

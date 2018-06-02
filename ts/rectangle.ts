@@ -65,4 +65,7 @@ export default class rectangle{
         this.x = pos.x;
         this.y = pos.y;
     }
+    static getAngle(p1: PIXI.Point, p2: PIXI.Point):number{
+        return Math.atan2(p2.y-p1.y, p2.x-p1.x);
+    }
 }

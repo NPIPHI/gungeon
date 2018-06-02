@@ -4,7 +4,9 @@ define(["require", "exports"], function (require, exports) {
     class gameObject {
         constructor() {
         }
-        update() {
+        update(deltaTime) {
+        }
+        clear() {
         }
     }
     exports.default = gameObject;

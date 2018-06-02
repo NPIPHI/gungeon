@@ -1,8 +1,11 @@
-export default class gameObject{
+export default abstract class gameObject{
     constructor(){
 
     }
-    update(){
+    update(deltaTime: number){
+
+    }
+    clear(){
         
     }
     sprite: PIXI.Sprite;
