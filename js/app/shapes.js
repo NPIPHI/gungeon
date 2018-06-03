@@ -63,5 +63,10 @@ define(["require", "exports"], function (require, exports) {
         }
     }
     exports.rectangle = rectangle;
+    class circle {
+        constructor(x, y, radius) {
+        }
+    }
+    exports.circle = circle;
 });
 //# sourceMappingURL=shapes.js.map

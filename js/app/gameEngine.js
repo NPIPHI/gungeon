@@ -40,6 +40,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                 }
             }
             keyboard_1.default.resetMouseToggle();
+            backGroundImage.position.x += 1;
         }
         generateFloor() {
             backGroundImage.removeChildren();

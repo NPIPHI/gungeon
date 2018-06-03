@@ -69,3 +69,13 @@ export class rectangle extends shape{
         return new rectangle(x,y, this.width,this.height);
     }
 }
+
+
+export class circle{
+    readonly x: number;
+    readonly y: number;
+    readonly radius: number;
+    constructor(x: number, y: number, radius: number){
+
+    }
+}
