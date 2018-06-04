@@ -5,8 +5,6 @@ export default abstract class gameObject{
     update(deltaTime: number){
 
     }
-    clear(){
-        
-    }
+    abstract destroy():void;
     sprite: PIXI.Sprite;
 }

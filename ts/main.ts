@@ -1,17 +1,12 @@
 import {gameEngine} from "./gameEngine";
 let app = new PIXI.Application({width: screen.width, height: screen.height});
-//Add the canvas that Pixi automatically created for you to the HTML document
 document.body.appendChild(app.view);
-PIXI.loader.add("images/playerSmile.png");
-//PIXI.loader.add("images/backGroundTexture.png")
-PIXI.loader.add("images/backGroundTexture.json")
-//  PIXI.loader.add("images/bullets.png")
-PIXI.loader.add("images/bullets.json")
-PIXI.loader.add("images/UIElements.json");
-//load an image and run the `setup` function when it's done
+PIXI.loader.add("res/playerSmile.png");
+PIXI.loader.add("res/backGroundTexture.json");
+PIXI.loader.add("res/bullets.json");
+PIXI.loader.add("res/UIElements.json");
+PIXI.loader.add("res/gunData.json");
 PIXI.loader.load(setup);
-
-//This `setup` function will run when the image has loaded
 function setup() {
   function gameLoop(delta: number) {
     game.cycle(delta, time);

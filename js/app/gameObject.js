@@ -6,8 +6,6 @@ define(["require", "exports"], function (require, exports) {
         }
         update(deltaTime) {
         }
-        clear() {
-        }
     }
     exports.default = gameObject;
 });

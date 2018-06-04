@@ -1,0 +1,29 @@
+
+{
+    "guns": {
+        "pistol":{
+            "fireRate": 15,
+            "fireSpeed" : 30,
+            "dammage" : 5,
+            "barrelLength" : 1,
+            "bulletType": 1,
+            "capacity": 6,
+            "reloadTime": 60,
+            "totalCapacity": 200,
+            "automatic": true
+
+        },
+        "crossBow":{
+            "fireRate": 40,
+            "fireSpeed" : 18,
+            "dammage" : 40,
+            "barrelLength" : 1,
+            "bulletType": 2,
+            "capacity": 1,
+            "reloadTime": 30,
+            "totalCapacity": 100,
+            "automatic": false
+
+        }
+    }
+}

@@ -14,6 +14,9 @@ define(["require", "exports"], function (require, exports) {
                 else {
                     this.toggleMap[evt.keyCode] = false;
                 }
+                if (evt.keyCode == 9) {
+                    evt.preventDefault();
+                }
                 this.map[evt.keyCode] = true;
             });
             window.addEventListener('keyup', evt => {
@@ -83,10 +86,13 @@ define(["require", "exports"], function (require, exports) {
                     return this.rightToggle;
             }
         }
-        resetMouseToggle() {
+        resetToggle() {
             this.leftToggle = false;
             this.middleToggle = false;
             this.rightToggle = false;
+            for (let i = 0; i < 250; i++) {
+                this.toggleMap[i] = false;
+            }
         }
     }
     let kbrd = new Keyboard;

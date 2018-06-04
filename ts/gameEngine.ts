@@ -8,7 +8,7 @@ export class gameEngine{
     constructor(app: PIXI.Application){
             pixi = app;
             timeDilate = 1;
-            this.mouse = new PIXI.Sprite(PIXI.loader.resources["images/UIElements.json"].textures["cursor1.png"]);
+            this.mouse = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["cursor1.png"]);
             pixi.stage.addChild(backGroundImage);
             pixi.stage.addChild(foreGroundImage);
             pixi.stage.addChild(UIImage);
@@ -42,23 +42,23 @@ export class gameEngine{
                 timeDilate-=0.01;
             }
         }
-        keyboard.resetMouseToggle();
+        keyboard.resetToggle();
+        backGroundImage.position.x;
     }
     generateFloor(){
         backGroundImage.removeChildren();
         walls = Array<rectangle>();
-        for(let i = 0; i <28; i++){
+        for(let i = 0; i <60; i++){
             let bufferTexture = wall.getFloorTexture();
             let bufferSprite = new PIXI.Sprite(bufferTexture);
-            bufferSprite.x=(i%7)*192;
-            bufferSprite.y=Math.floor(i/7)*192;
+            bufferSprite.x=(i%10)*192;
+            bufferSprite.y=Math.floor(i/10)*192;
             backGroundImage.addChild(bufferSprite);
         }
-        new wall(0,0,1280,50);
-        new wall(0,0,50,720);
-        new wall(0,670,1280,50);
-        new wall(1230,0,50,720);
-        new wall(600,0,30,600);
+        new wall(0,0,1920,50);
+        new wall(0,0,50,1080);
+        new wall(0,1030,1920,50);
+        new wall(1870,0,50,1080);
     }
 };
 
@@ -68,12 +68,18 @@ class player extends gameObject{
     movSpeed: number = 0.25;   
     guns: gun[] = Array<gun>(); 
     currentGun: number;
+    reloadBar: progressBar;
+    ammoCounter: fractionCounter;
     constructor(x: number, y: number){
         super();
-        this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage("images/playerSmile.png"));
+        this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage("res/playerSmile.png"));
         this.sprite.position = new PIXI.Point(x,y);
+        this.reloadBar = new progressBar(x,y-50,40,1);
+        this.ammoCounter = new fractionCounter(screen.width-50,screen.height-50, 0,0,true);
         this.guns.push(new gun(1));
-        this.currentGun = 1;
+        this.guns.push(new gun(2));
+        this.guns[0].switchGunIn(this.ammoCounter,this.reloadBar);
+        this.currentGun = 0;
         bufferGameObjects.push(this);
         foreGroundImage.addChild(this.sprite);
     }
@@ -84,24 +90,25 @@ class player extends gameObject{
         this.hitbox = this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
         this.collision(deltaTime);
         this.mov.set(0,0);
-        if(this.guns[this.currentGun-1].automatic){
+        if(this.guns[this.currentGun].automatic){
             if(keyboard.getMouse(1)){
-                this.guns[this.currentGun-1].shoot(deltaTime);
+                this.guns[this.currentGun].shoot(deltaTime);
             }
         } else {
             if(keyboard.getMouseToggle(1)){
-                this.guns[this.currentGun-1].shoot(deltaTime);
+                this.guns[this.currentGun].shoot(deltaTime);
             }
         }
         if(keyboard.getMouseToggle(3)){
-            this.guns[this.currentGun-1].reload();
+            this.guns[this.currentGun].reload();
         }
         if(keyboard.getToggle(9)){
-            this.guns[this.currentGun-1].switch();
+            this.guns[this.currentGun].switchGunOut();
             this.currentGun ++;
             this.currentGun%=this.guns.length;
+            this.guns[this.currentGun].switchGunIn(this.ammoCounter,this.reloadBar);
         }
-        this.guns[this.currentGun-1].update(deltaTime);
+        this.guns[this.currentGun].update(deltaTime);
     }
     keyboardManage(deltaTime: number){
         if(keyboard.getKey(87)){//w
@@ -151,6 +158,26 @@ class player extends gameObject{
             }
         });
     }
+    destroy(){
+
+    }
+}
+
+
+class enemy extends gameObject{
+    sprite: PIXI.Sprite;
+    constructor(enemyType: number){
+        super();
+    }
+    getTypeProperties(type: number){
+        switch(type){
+            case 1:
+
+        }
+    }
+    destroy(){
+
+    }
 }
 
 
@@ -195,9 +222,9 @@ class bullet extends gameObject{
     getBulletType(index: number):PIXI.Texture{
         switch(index){
             case 1: 
-                return PIXI.loader.resources["images/bullets.json"].textures["smallYellow.png"];
+                return PIXI.loader.resources["res/bullets.json"].textures["smallYellow.png"];
             case 2:
-                return PIXI.loader.resources["images/bullets.json"].textures["crossBolt.png"];
+                return PIXI.loader.resources["res/bullets.json"].textures["crossBolt.png"];
         }
     }
 }
@@ -218,50 +245,60 @@ class gun{
     currentRounds: number; //current number of rounds. Includes those currently loaded
     currentLoad: number; //how many rounds are in the gun
     shotCooldown: number = 0; //time untill can shoot again
-    counter: fractionCounter; //numerator is currentLoad, denomenator is current rounds
     automatic: boolean; //if fire can be held down
-    reloadProgress: progressBar;
-    constructor(type: number){
-        this.getTypePropeties(type);
-        this.counter = new fractionCounter(1200, 630, this.currentLoad,this.currentRounds, true);
-        this.reloadProgress = new progressBar(0,0,40,this.reloadTime);
-        this.reloadProgress.hide();
+    isActive: boolean; //if the gun is the current gun of player
+    constructor(type: number,){
+        this.getTypePropeties(1);
     }
     getTypePropeties(type: number){
+        let gun;
         switch(type){
             case 1:
-                this.fireRate = 5;
-                this.fireSpeed = 10;
-                this.dammage = 5;
-                this.barrelLength = 0;
-                this.bulletType = 1;
-                this.capacity = 6;
-                this.reloadTime = 60;
-                this.totalCapacity = 200;
-                this.currentRounds = 200;
-                this.currentLoad = this.capacity;
-                this.automatic = true;
+                gun = PIXI.loader.resources["res/gunData.json"].data.guns.pistol;
+                break;
+            case 2: 
+                gun = PIXI.loader.resources["res/gunData.json"].data.guns.crossBow;
         }
+        this.fireRate = gun.fireRate;
+        this.fireSpeed = gun.fireSpeed;
+        this.dammage = gun.dammage;
+        this.barrelLength = gun.barrelLength;
+        this.bulletType = gun.bulletType;
+        this.capacity = gun.capacity;
+        this.reloadTime = gun.reloadTime;
+        this.totalCapacity = gun.totalCapacity;
+        this.currentRounds = this.totalCapacity;
+        this.currentLoad = this.capacity;
+        this.automatic = gun.automatic;
+        this.isActive = false;
     }
     shoot(deltaTime: number){
         if(!this.reloading){
             if(this.currentLoad>0){
                 if(this.shotCooldown<=0){
                     let angle = rectangle.getAngle(new PIXI.Point(p1.sprite.position.x+p1.sprite.width/2, p1.sprite.position.y+p1.sprite.height/2), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
-                    new bullet(p1.sprite.x+((p1.sprite.width/2)+this.barrelLength)*Math.cos(angle)+p1.sprite.width/2, p1.sprite.y+((p1.sprite.height/2)+this.barrelLength)*Math.sin(angle)+p1.sprite.height/2, angle, 1,5,1);
+                    new bullet(p1.sprite.x+((p1.sprite.width/2)+this.barrelLength)*Math.cos(angle)+p1.sprite.width/2, p1.sprite.y+((p1.sprite.height/2)+this.barrelLength)*Math.sin(angle)+p1.sprite.height/2, angle, 1,5,this.bulletType);
                     this.shotCooldown = this.fireRate;
                     this.currentLoad--;
                     this.currentRounds--;
-                    this.counter.setValue(this.currentLoad,this.currentRounds);
+                    p1.ammoCounter.setValue(this.currentLoad,this.currentRounds);
                 }
             } else{
                 this.reload();
             }
         }
     }
-    switch() {
+    switchGunOut() {
         this.reloading = false;
         this.reloadProg = 0;
+        this.isActive = false;
+    }
+    switchGunIn(ammoCounter: fractionCounter, reloadBar: progressBar){
+        ammoCounter.setValue(this.currentLoad,this.currentRounds);
+        reloadBar.limit = this.reloadTime;
+        reloadBar.hide();
+        this.isActive = true;
+        this.shotCooldown=this.fireRate;
     }
     update(deltaTime: number){
         if(this.reloading){
@@ -273,12 +310,12 @@ class gun{
         if(this.shotCooldown>0){
             this.shotCooldown-=deltaTime;
         }
-        this.reloadProgress.setPointer(this.reloadProg);
-        this.reloadProgress.setPosition(p1.sprite.position.x,p1.sprite.position.y-20);
+        p1.reloadBar.setPointer(this.reloadProg);
+        p1.reloadBar.setPosition(p1.sprite.position.x,p1.sprite.position.y-20);
     }
     reload(){
         if(this.currentRounds>=0&&this.currentLoad!=this.capacity&&this.currentRounds>0){
-            this.reloadProgress.show();
+            p1.reloadBar.show();
             this.reloading = true;
         }
     }
@@ -293,15 +330,15 @@ class gun{
             this.currentRounds = 0;
         }
         this.currentRounds+=this.currentLoad;
-        this.counter.setValue(this.currentLoad,this.currentRounds);
-        this.reloadProgress.hide();
+        p1.ammoCounter.setValue(this.currentLoad,this.currentRounds);
+        p1.reloadBar.hide();
     }
     refill(){
         this.reloading = false;
         this.reloadProg = 0;
         this.currentRounds = this.totalCapacity;
         this.currentLoad = this.capacity;
-        this.counter.setValue(this.currentLoad,this.currentRounds);
+        p1.ammoCounter.setValue(this.currentLoad,this.currentRounds);
     }
 }
 
@@ -336,35 +373,35 @@ class wall{
     }
     static getCelingTexture():PIXI.Texture{
         if(Math.random()<0.33){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["celing1.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["celing1.png"];
         } else if(Math.random()<0.5){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["celing2.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["celing2.png"];
         } else{
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["celing3.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["celing3.png"];
         }
     }
     static getFloorTexture():PIXI.Texture{
         if(Math.random()<0.33){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["floor1.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["floor1.png"];
         } else if(Math.random()<0.5){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["floor2.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["floor2.png"];
         } else{
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["floor3.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["floor3.png"];
         }
     }
     static getWallTexture():PIXI.Texture{
         if(Math.random()<0.1){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["wall6.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["wall6.png"];
         } else if(Math.random()<0.4){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["wall5.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["wall5.png"];
         } else if(Math.random()<0.4){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["wall4.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["wall4.png"];
         } else if(Math.random()<0.33){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["wall3.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["wall3.png"];
         } else if(Math.random()<0.5){
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["wall2.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["wall2.png"];
         } else{
-            return PIXI.loader.resources["images/backGroundTexture.json"].textures["wall1.png"];
+            return PIXI.loader.resources["res/backGroundTexture.json"].textures["wall1.png"];
         }
     }
 }
@@ -421,13 +458,13 @@ class animation{
     getAnimFrames(type: number){
         switch(type){
             case 1: 
-                this.img.push(PIXI.loader.resources["images/bullets.json"].textures["smallYellowExp1.png"]);
-                this.img.push(PIXI.loader.resources["images/bullets.json"].textures["smallYellowExp2.png"]);
-                this.img.push(PIXI.loader.resources["images/bullets.json"].textures["smallYellowExp3.png"]);
-                this.img.push(PIXI.loader.resources["images/bullets.json"].textures["smallYellowExp4.png"]);
-                this.img.push(PIXI.loader.resources["images/bullets.json"].textures["smallYellowExp5.png"]);
-                this.img.push(PIXI.loader.resources["images/bullets.json"].textures["smallYellowExp6.png"]);
-                this.img.push(PIXI.loader.resources["images/bullets.json"].textures["smallYellowExp7.png"]);
+                this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp1.png"]);
+                this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp2.png"]);
+                this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp3.png"]);
+                this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp4.png"]);
+                this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp5.png"]);
+                this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp6.png"]);
+                this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp7.png"]);
                 this.frames = 7;
         }
     }
@@ -435,13 +472,20 @@ class animation{
         foreGroundImage.removeChild(this.sprite);
     }
 }
+
+
 abstract class UIObject{
     constructor(){
 
     }
     abstract getBounds():rectangle;
     abstract remove():void;
+    abstract show():void;
+    abstract hide():void;
+    visible: boolean;
 }
+
+
 class numberCounter extends UIObject{
     dispNum: number;
     x: number;
@@ -453,22 +497,25 @@ class numberCounter extends UIObject{
         this.y = y;
         this.dispNum = Math.abs(dispNum);
         this.generateSprites(dispNum);
+        this.visible = true;
     }
     generateSprites(n: number){
         this.sprites.forEach(spr => {
             UIImage.removeChild(spr);
         });
-        this.sprites = Array<PIXI.Sprite>();
-        let length = n<100000?n<100?n<10?1:2:n<1000?3:n<10000?4:5:n<10000000?n<1000000?6:7:n<100000000?8:n<1000000000?9:10;
-        for(let i = 0; i < length; i ++){
-            let bufferSprite = new PIXI.Sprite(PIXI.loader.resources["images/UIElements.json"].textures[Math.floor(n/Math.pow(10,length-i-1))%10+".png"]);
-            bufferSprite.position.x = this.x + this.getSpacing();
-            bufferSprite.position.y = this.y;
-            this.sprites.push(bufferSprite);
+        if(this.visible){
+            this.sprites = Array<PIXI.Sprite>();
+            let length = n<100000?n<100?n<10?1:2:n<1000?3:n<10000?4:5:n<10000000?n<1000000?6:7:n<100000000?8:n<1000000000?9:10;
+            for(let i = 0; i < length; i ++){
+                let bufferSprite = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures[Math.floor(n/Math.pow(10,length-i-1))%10+".png"]);
+                bufferSprite.position.x = this.x + this.getSpacing();
+                bufferSprite.position.y = this.y;
+                this.sprites.push(bufferSprite);
+            }
+            this.sprites.forEach(spr => {
+                UIImage.addChild(spr);
+            });
         }
-        this.sprites.forEach(spr => {
-            UIImage.addChild(spr);
-        });
     }
     getSpacing():number{
         let spacing = 0;
@@ -509,6 +556,14 @@ class numberCounter extends UIObject{
             UIImage.removeChild(spr);
         });
     }
+    hide(){
+        this.visible = false;
+        this.generateSprites(this.dispNum);
+    }
+    show(){
+        this.visible = true;
+        this.generateSprites(this.dispNum);
+    }
 }
 
 
@@ -520,7 +575,7 @@ class fractionCounter extends UIObject{
     width: number;
     line: PIXI.Sprite;
     justifyCenter: boolean;
-    lineTexture: PIXI.Texture = PIXI.loader.resources["images/UIElements.json"].textures["whiteLine.png"];
+    lineTexture: PIXI.Texture = PIXI.loader.resources["res/UIElements.json"].textures["whiteLine.png"];
     constructor(x: number, y: number, numerator: number, denomenator: number, justifyCenter: boolean){
         super();
         this.justifyCenter = justifyCenter;
@@ -528,6 +583,7 @@ class fractionCounter extends UIObject{
         this.denomenator = new numberCounter(0,0, denomenator);
         this.x = x;
         this.y = y;
+        this.visible = true;
         this.line = new PIXI.Sprite;
         this.calculatePositions();
         UIImage.addChild(this.line);
@@ -557,6 +613,18 @@ class fractionCounter extends UIObject{
         this.denomenator.remove();
         UIImage.removeChild(this.line);
     }
+    hide(){
+        this.visible = false;
+        this.line.visible = false;
+        this.numerator.hide();
+        this.denomenator.hide();
+    }
+    show(){
+        this.visible = true;
+        this.line.visible = true;
+        this.numerator.show();
+        this.denomenator.show();
+    }
 }
 
 
@@ -564,7 +632,7 @@ class progressBar extends UIObject{
     x: number;
     y: number;
     line: PIXI.Sprite;
-    lineTexture: PIXI.Texture = PIXI.loader.resources["images/UIElements.json"].textures["whiteLine.png"];
+    lineTexture: PIXI.Texture = PIXI.loader.resources["res/UIElements.json"].textures["whiteLine.png"];
     pointer: PIXI.Sprite;
     limit: number;
     length: number;
@@ -572,7 +640,7 @@ class progressBar extends UIObject{
     constructor(x: number, y: number, length: number, limit: number){
         super();
         this.line = new PIXI.Sprite(new PIXI.Texture(this.lineTexture.baseTexture,new PIXI.Rectangle(this.lineTexture.frame.x,this.lineTexture.frame.y,Math.min(length,this.lineTexture.width),3)));
-        this.pointer = new PIXI.Sprite(PIXI.loader.resources["images/UIElements.json"].textures["pointer.png"]);
+        this.pointer = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["pointer.png"]);
         this.pointer.position.x = x;
         this.pointer.position.y = y;
         this.line.position.x=x;
@@ -582,6 +650,7 @@ class progressBar extends UIObject{
         this.length = length;
         this.x =x;
         this.y =y;
+        this.visible = true;
         this.setPointer(0);
         UIImage.addChild(this.line);
         UIImage.addChild(this.pointer);
@@ -608,10 +677,12 @@ class progressBar extends UIObject{
     hide(){
         this.line.visible = false;
         this.pointer.visible = false;
+        this.visible = false;
     }
     show(){
         this.line.visible = true;
         this.pointer.visible = true;
+        this.visible = true;
     }
 }
 
