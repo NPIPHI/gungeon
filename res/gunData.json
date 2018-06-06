@@ -3,7 +3,7 @@
     "guns": {
         "pistol":{
             "fireRate": 15,
-            "fireSpeed" : 30,
+            "fireSpeed" : 10,
             "dammage" : 5,
             "barrelLength" : 1,
             "bulletType": 1,
@@ -15,7 +15,7 @@
         },
         "crossBow":{
             "fireRate": 40,
-            "fireSpeed" : 18,
+            "fireSpeed" : 6,
             "dammage" : 40,
             "barrelLength" : 1,
             "bulletType": 2,

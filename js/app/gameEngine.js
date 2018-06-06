@@ -181,6 +181,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.dammage = dammage;
             this.speed = speed;
             this.sprite.rotation = heading;
+            this.type = typeIndex;
             foreGroundImage.addChild(this.sprite);
             bufferGameObjects.push(this);
         }
@@ -196,7 +197,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
         }
         destroy() {
             if (!this.isDestroyed) {
-                animator.makeAnimation(this.sprite.x + this.sprite.width / 2, this.sprite.y + this.sprite.height / 2, 1);
+                animator.makeAnimation(this.sprite.x + this.sprite.width / 2, this.sprite.y + this.sprite.height / 2, this.type, this.heading);
                 this.isDestroyed = true;
                 foreGroundImage.removeChild(this.sprite);
                 removeGameObjects.push(this);
@@ -216,7 +217,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.reloading = false;
             this.reloadProg = 0;
             this.shotCooldown = 0;
-            this.getTypePropeties(1);
+            this.getTypePropeties(type);
         }
         getTypePropeties(type) {
             let gun;
@@ -245,7 +246,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                 if (this.currentLoad > 0) {
                     if (this.shotCooldown <= 0) {
                         let angle = shapes_1.rectangle.getAngle(new PIXI.Point(p1.sprite.position.x + p1.sprite.width / 2, p1.sprite.position.y + p1.sprite.height / 2), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
-                        new bullet(p1.sprite.x + ((p1.sprite.width / 2) + this.barrelLength) * Math.cos(angle) + p1.sprite.width / 2, p1.sprite.y + ((p1.sprite.height / 2) + this.barrelLength) * Math.sin(angle) + p1.sprite.height / 2, angle, 1, 5, this.bulletType);
+                        new bullet(p1.sprite.x + ((p1.sprite.width / 2) + this.barrelLength) * Math.cos(angle) + p1.sprite.width / 2, p1.sprite.y + ((p1.sprite.height / 2) + this.barrelLength) * Math.sin(angle) + p1.sprite.height / 2, angle, this.bulletType, this.fireSpeed, this.bulletType);
                         this.shotCooldown = this.fireRate;
                         this.currentLoad--;
                         this.currentRounds--;
@@ -387,8 +388,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.animations = Array();
             this.removeAnimation = Array();
         }
-        makeAnimation(x, y, index) {
-            this.animations.push(new animation(x, y, index, this.time));
+        makeAnimation(x, y, index, angle) {
+            this.animations.push(new animation(x, y, index, this.time, angle));
         }
         animate(timeDelta) {
             this.animations.forEach(anim => {
@@ -410,7 +411,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
         }
     }
     class animation {
-        constructor(x, y, type, time) {
+        constructor(x, y, type, time, angle) {
             this.img = Array();
             this.startTime = time;
             this.getAnimFrames(type);
@@ -419,7 +420,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.sprite.position.y = y - this.sprite.width / 2;
             this.x = x;
             this.y = y;
+            this.sprite.rotation = angle;
             this.frames -= 0.01;
+            this.angle = angle;
             foreGroundImage.addChild(this.sprite);
         }
         getAnimFrames(type) {
@@ -433,6 +436,22 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp6.png"]);
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp7.png"]);
                     this.frames = 7;
+                    break;
+                case 2:
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp1.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp2.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp3.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp4.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp5.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp6.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp7.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp8.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp9.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp10.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp11.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp12.png"]);
+                    this.frames = 12;
+                    break;
             }
         }
         remove() {
