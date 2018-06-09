@@ -1,20 +1,24 @@
-define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], function (require, exports, shapes_1, keyboard_1, gameObject_1) {
+define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemys"], function (require, exports, shapes_1, keyboard_1, gameObject_1, enemys_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class gameEngine {
         constructor(app) {
-            pixi = app;
+            pixiApp = app;
             timeDilate = 1;
             this.mouse = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["cursor1.png"]);
-            pixi.stage.addChild(backGroundImage);
-            pixi.stage.addChild(foreGroundImage);
-            pixi.stage.addChild(UIImage);
+            pixiApp.stage.addChild(exports.backGroundImage);
+            pixiApp.stage.addChild(exports.foreGroundImage);
+            pixiApp.stage.addChild(UIImage);
             this.generateFloor();
-            pixi.stage.addChild(this.mouse);
+            pixiApp.stage.addChild(this.mouse);
             this.makePlayer(100, 100);
+            new enemys_1.bulletMan(200, 200, 1);
+            new enemys_1.bulletMan(300, 200, 1);
+            new enemys_1.bulletMan(400, 200, 1);
+            new enemys_1.bulletMan(500, 200, 1);
         }
         makePlayer(x, y) {
-            p1 = new player(x, y);
+            exports.p1 = new player(x, y);
         }
         cycle(deltaTime, time) {
             this.mouse.position.x = keyboard_1.default.mouseX - this.mouse.width / 2;
@@ -22,14 +26,14 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             gameObjects.forEach(element => {
                 element.update(deltaTime * timeDilate);
             });
-            removeGameObjects.forEach(obj => {
+            exports.removeGameObjects.forEach(obj => {
                 gameObjects.splice(gameObjects.indexOf(obj), 1);
             });
-            bufferGameObjects.forEach(obj => {
+            exports.bufferGameObjects.forEach(obj => {
                 gameObjects.push(obj);
             });
-            bufferGameObjects = Array();
-            removeGameObjects = Array();
+            exports.bufferGameObjects = Array();
+            exports.removeGameObjects = Array();
             animator.animate(deltaTime * timeDilate);
             if (keyboard_1.default.getKey(39)) {
                 timeDilate += 0.01;
@@ -40,22 +44,24 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                 }
             }
             keyboard_1.default.resetToggle();
-            backGroundImage.position.x;
         }
         generateFloor() {
-            backGroundImage.removeChildren();
+            exports.backGroundImage.removeChildren();
             walls = Array();
             for (let i = 0; i < 60; i++) {
                 let bufferTexture = wall.getFloorTexture();
                 let bufferSprite = new PIXI.Sprite(bufferTexture);
                 bufferSprite.x = (i % 10) * 192;
                 bufferSprite.y = Math.floor(i / 10) * 192;
-                backGroundImage.addChild(bufferSprite);
+                exports.backGroundImage.addChild(bufferSprite);
             }
             new wall(0, 0, 1920, 50);
             new wall(0, 0, 50, 1080);
             new wall(0, 1030, 1920, 50);
             new wall(1870, 0, 50, 1080);
+        }
+        static makeBullet(x, y, heading, typeIndex, speed, dammage, enemy) {
+            new bullet(x, y, heading, typeIndex, speed, dammage, enemy);
         }
     }
     exports.gameEngine = gameEngine;
@@ -64,7 +70,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
         constructor(x, y) {
             super();
             this.mov = new PIXI.Point(0, 0);
-            this.hitbox = new shapes_1.rectangle(0, 0, 40, 40);
             this.movSpeed = 0.25;
             this.guns = Array();
             this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage("res/playerSmile.png"));
@@ -75,8 +80,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.guns.push(new gun(2));
             this.guns[0].switchGunIn(this.ammoCounter, this.reloadBar);
             this.currentGun = 0;
-            bufferGameObjects.push(this);
-            foreGroundImage.addChild(this.sprite);
+            this.hitbox = new shapes_1.rectangle(x, y, this.sprite.width, this.sprite.height);
+            exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
             this.keyboardManage(deltaTime);
@@ -87,12 +92,12 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.mov.set(0, 0);
             if (this.guns[this.currentGun].automatic) {
                 if (keyboard_1.default.getMouse(1)) {
-                    this.guns[this.currentGun].shoot(deltaTime);
+                    this.guns[this.currentGun].shoot();
                 }
             }
             else {
                 if (keyboard_1.default.getMouseToggle(1)) {
-                    this.guns[this.currentGun].shoot(deltaTime);
+                    this.guns[this.currentGun].shoot();
                 }
             }
             if (keyboard_1.default.getMouseToggle(3)) {
@@ -108,16 +113,16 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
         }
         keyboardManage(deltaTime) {
             if (keyboard_1.default.getKey(87)) {
-                this.mov.y -= 3 * deltaTime;
+                this.mov.y -= 2 * deltaTime;
             }
             if (keyboard_1.default.getKey(65)) {
-                this.mov.x += -3 * deltaTime;
+                this.mov.x += -2 * deltaTime;
             }
             if (keyboard_1.default.getKey(83)) {
-                this.mov.y += 3 * deltaTime;
+                this.mov.y += 2 * deltaTime;
             }
             if (keyboard_1.default.getKey(68)) {
-                this.mov.x += 3 * deltaTime;
+                this.mov.x += 2 * deltaTime;
             }
         }
         collision(deltaTime) {
@@ -155,22 +160,12 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             });
         }
         destroy() {
-        }
-    }
-    class enemy extends gameObject_1.default {
-        constructor(enemyType) {
-            super();
-        }
-        getTypeProperties(type) {
-            switch (type) {
-                case 1:
-            }
-        }
-        destroy() {
+            super.destroy();
+            exports.foreGroundImage.removeChild(this.sprite);
         }
     }
     class bullet extends gameObject_1.default {
-        constructor(x, y, heading, typeIndex, speed, dammage) {
+        constructor(x, y, heading, typeIndex, speed, dammage, enemy) {
             super();
             this.isDestroyed = false;
             this.sprite = new PIXI.Sprite(this.getBulletType(typeIndex));
@@ -182,8 +177,14 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.speed = speed;
             this.sprite.rotation = heading;
             this.type = typeIndex;
-            foreGroundImage.addChild(this.sprite);
-            bufferGameObjects.push(this);
+            this.enemy = enemy;
+            if (enemy) {
+                exports.enemyBullets.push(this);
+            }
+            else {
+                exports.playerBullets.push(this);
+            }
+            exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
             this.sprite.x += this.speed * Math.cos(this.heading) * deltaTime;
@@ -197,10 +198,17 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
         }
         destroy() {
             if (!this.isDestroyed) {
-                animator.makeAnimation(this.sprite.x + this.sprite.width / 2, this.sprite.y + this.sprite.height / 2, this.type, this.heading);
+                super.destroy();
+                animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y, this.type, this.heading);
                 this.isDestroyed = true;
-                foreGroundImage.removeChild(this.sprite);
-                removeGameObjects.push(this);
+                exports.foreGroundImage.removeChild(this.sprite);
+                if (this.enemy) {
+                    exports.enemyBullets.splice(exports.enemyBullets.indexOf(this), 1);
+                }
+                else {
+                    exports.playerBullets.splice(exports.playerBullets.indexOf(this), 1);
+                    ;
+                }
             }
         }
         getBulletType(index) {
@@ -209,6 +217,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                     return PIXI.loader.resources["res/bullets.json"].textures["smallYellow.png"];
                 case 2:
                     return PIXI.loader.resources["res/bullets.json"].textures["crossBolt.png"];
+                case 3:
+                    return PIXI.loader.resources["res/bullets.json"].textures["smallRed.png"];
             }
         }
     }
@@ -241,16 +251,16 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.automatic = gun.automatic;
             this.isActive = false;
         }
-        shoot(deltaTime) {
+        shoot() {
             if (!this.reloading) {
                 if (this.currentLoad > 0) {
                     if (this.shotCooldown <= 0) {
-                        let angle = shapes_1.rectangle.getAngle(new PIXI.Point(p1.sprite.position.x + p1.sprite.width / 2, p1.sprite.position.y + p1.sprite.height / 2), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
-                        new bullet(p1.sprite.x + ((p1.sprite.width / 2) + this.barrelLength) * Math.cos(angle) + p1.sprite.width / 2, p1.sprite.y + ((p1.sprite.height / 2) + this.barrelLength) * Math.sin(angle) + p1.sprite.height / 2, angle, this.bulletType, this.fireSpeed, this.bulletType);
+                        let angle = shapes_1.rectangle.getAngle(new PIXI.Point(exports.p1.sprite.position.x + exports.p1.sprite.width / 2, exports.p1.sprite.position.y + exports.p1.sprite.height / 2), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                        new bullet(exports.p1.sprite.x + ((exports.p1.sprite.width / 2) + this.barrelLength) * Math.cos(angle) + exports.p1.sprite.width / 2, exports.p1.sprite.y + ((exports.p1.sprite.height / 2) + this.barrelLength) * Math.sin(angle) + exports.p1.sprite.height / 2, angle, this.bulletType, this.fireSpeed, this.dammage, false);
                         this.shotCooldown = this.fireRate;
                         this.currentLoad--;
                         this.currentRounds--;
-                        p1.ammoCounter.setValue(this.currentLoad, this.currentRounds);
+                        exports.p1.ammoCounter.setValue(this.currentLoad, this.currentRounds);
                     }
                 }
                 else {
@@ -280,12 +290,12 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             if (this.shotCooldown > 0) {
                 this.shotCooldown -= deltaTime;
             }
-            p1.reloadBar.setPointer(this.reloadProg);
-            p1.reloadBar.setPosition(p1.sprite.position.x, p1.sprite.position.y - 20);
+            exports.p1.reloadBar.setPointer(this.reloadProg);
+            exports.p1.reloadBar.setPosition(exports.p1.sprite.position.x, exports.p1.sprite.position.y - 20);
         }
         reload() {
             if (this.currentRounds >= 0 && this.currentLoad != this.capacity && this.currentRounds > 0) {
-                p1.reloadBar.show();
+                exports.p1.reloadBar.show();
                 this.reloading = true;
             }
         }
@@ -301,15 +311,15 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                 this.currentRounds = 0;
             }
             this.currentRounds += this.currentLoad;
-            p1.ammoCounter.setValue(this.currentLoad, this.currentRounds);
-            p1.reloadBar.hide();
+            exports.p1.ammoCounter.setValue(this.currentLoad, this.currentRounds);
+            exports.p1.reloadBar.hide();
         }
         refill() {
             this.reloading = false;
             this.reloadProg = 0;
             this.currentRounds = this.totalCapacity;
             this.currentLoad = this.capacity;
-            p1.ammoCounter.setValue(this.currentLoad, this.currentRounds);
+            exports.p1.ammoCounter.setValue(this.currentLoad, this.currentRounds);
         }
     }
     class wall {
@@ -320,21 +330,21 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                     let bufferSprite = new PIXI.Sprite(new PIXI.Texture(bufferTexture.baseTexture, new PIXI.Rectangle(bufferTexture.frame.x, bufferTexture.frame.y, Math.min(w - n * 64, bufferTexture.width), Math.min(h - i * 64 - 20, bufferTexture.height))));
                     bufferSprite.x = x + n * 64;
                     bufferSprite.y = y + i * 64;
-                    backGroundImage.addChild(bufferSprite);
+                    exports.backGroundImage.addChild(bufferSprite);
                 }
                 {
                     let bufferTexture = wall.getWallTexture();
                     let bufferSprite = new PIXI.Sprite(new PIXI.Texture(bufferTexture.baseTexture, new PIXI.Rectangle(bufferTexture.frame.x, bufferTexture.frame.y, Math.min(w - n * 64, bufferTexture.frame.width), 20)));
                     bufferSprite.x = x + n * 64;
                     bufferSprite.y = y + h - 20;
-                    backGroundImage.addChild(bufferSprite);
+                    exports.backGroundImage.addChild(bufferSprite);
                 }
                 {
                     let bufferTexture = wall.getWallTexture();
                     let bufferSprite = new PIXI.Sprite(new PIXI.Texture(bufferTexture.baseTexture, new PIXI.Rectangle(bufferTexture.frame.x, bufferTexture.frame.y, Math.min(w - (n * 64 + 32), bufferTexture.frame.width), 20)));
                     bufferSprite.x = x + n * 64 + 32;
                     bufferSprite.y = y + h - 20;
-                    backGroundImage.addChild(bufferSprite);
+                    exports.backGroundImage.addChild(bufferSprite);
                 }
             }
             walls.push(new shapes_1.rectangle(x, y, w, h));
@@ -423,7 +433,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.sprite.rotation = angle;
             this.frames -= 0.01;
             this.angle = angle;
-            foreGroundImage.addChild(this.sprite);
+            exports.foreGroundImage.addChild(this.sprite);
         }
         getAnimFrames(type) {
             switch (type) {
@@ -435,7 +445,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp5.png"]);
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp6.png"]);
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp7.png"]);
-                    this.frames = 7;
                     break;
                 case 2:
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp1.png"]);
@@ -450,12 +459,17 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp10.png"]);
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp11.png"]);
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp12.png"]);
-                    this.frames = 12;
+                    break;
+                case 3:
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp1.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp2.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp3.png"]);
                     break;
             }
+            this.frames = this.img.length;
         }
         remove() {
-            foreGroundImage.removeChild(this.sprite);
+            exports.foreGroundImage.removeChild(this.sprite);
         }
     }
     class UIObject {
@@ -642,16 +656,17 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject"], functio
             this.visible = true;
         }
     }
-    let pixi;
+    let pixiApp;
     let gameObjects = new Array();
-    let bufferGameObjects = new Array();
-    let removeGameObjects = new Array();
+    exports.bufferGameObjects = new Array();
+    exports.removeGameObjects = new Array();
     let timeDilate;
-    let backGroundImage = new PIXI.particles.ParticleContainer();
-    let foreGroundImage = new PIXI.Container();
+    exports.playerBullets = new Array();
+    exports.enemyBullets = new Array();
+    exports.backGroundImage = new PIXI.particles.ParticleContainer();
+    exports.foreGroundImage = new PIXI.Container();
     let UIImage = new PIXI.Container();
     let walls = new Array();
     let animator = new animationHandeler();
-    let p1;
 });
 //# sourceMappingURL=gameEngine.js.map

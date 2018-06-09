@@ -7,6 +7,9 @@ define(["require", "exports"], function (require, exports) {
         static getAngle(p1, p2) {
             return Math.atan2(p2.y - p1.y, p2.x - p1.x);
         }
+        static getDistance(p1, p2) {
+            return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+        }
     }
     class rectangle extends shape {
         constructor(x, y, width, height) {
@@ -61,10 +64,17 @@ define(["require", "exports"], function (require, exports) {
         translateAbsolute(x, y) {
             return new rectangle(x, y, this.width, this.height);
         }
+        getCenter() {
+            return new PIXI.Point(this.x + this.width / 2, this.y + this.height / 2);
+        }
     }
     exports.rectangle = rectangle;
-    class circle {
+    class circle extends shape {
         constructor(x, y, radius) {
+            super();
+        }
+        getCenter() {
+            return new PIXI.Point(this.x, this.y);
         }
     }
     exports.circle = circle;

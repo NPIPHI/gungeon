@@ -1,10 +1,15 @@
+import {bufferGameObjects, removeGameObjects} from "./gameEngine";
+
+
 export default abstract class gameObject{
     constructor(){
-
+        bufferGameObjects.push(this);
     }
     update(deltaTime: number){
 
     }
-    abstract destroy():void;
+    destroy(){
+        removeGameObjects.push(this);
+    }
     sprite: PIXI.Sprite;
 }

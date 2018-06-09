@@ -2,12 +2,12 @@
 {
     "guns": {
         "pistol":{
-            "fireRate": 15,
-            "fireSpeed" : 10,
+            "fireRate": 10,
+            "fireSpeed" : 8,
             "dammage" : 5,
             "barrelLength" : 1,
             "bulletType": 1,
-            "capacity": 6,
+            "capacity": 8,
             "reloadTime": 60,
             "totalCapacity": 200,
             "automatic": true

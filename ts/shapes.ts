@@ -6,6 +6,10 @@ abstract class shape{
     static getAngle(p1: PIXI.Point, p2: PIXI.Point):number{
         return Math.atan2(p2.y-p1.y, p2.x-p1.x);
     }
+    static getDistance(p1: PIXI.Point, p2: PIXI.Point):number{
+        return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
+    }
+    abstract getCenter():PIXI.Point;
 }
 export class rectangle extends shape{
     readonly x: number;
@@ -68,14 +72,20 @@ export class rectangle extends shape{
     translateAbsolute(x: number, y:number):rectangle{
         return new rectangle(x,y, this.width,this.height);
     }
+    getCenter():PIXI.Point{
+        return new PIXI.Point(this.x + this.width/2, this.y + this.height/2);
+    }
 }
 
 
-export class circle{
+export class circle extends shape{
     readonly x: number;
     readonly y: number;
     readonly radius: number;
     constructor(x: number, y: number, radius: number){
-
+        super();
+    }
+    getCenter():PIXI.Point{
+        return new PIXI.Point(this.x,this.y);
     }
 }
