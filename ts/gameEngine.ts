@@ -12,9 +12,13 @@ export class gameEngine{
             this.mouse = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["cursor1.png"]);
             pixiApp.stage.addChild(backGroundImage);
             pixiApp.stage.addChild(foreGroundImage);
+            pixiApp.stage.addChild(lighting);
             pixiApp.stage.addChild(UIImage);
+            UIImage.addChild(this.mouse);
             this.generateFloor();           
-            pixiApp.stage.addChild(this.mouse);
+            let light = new PIXI.Sprite(PIXI.loader.resources["res/backGroundTexture.json"].textures["light120.png"]);
+            light.position = new PIXI.Point(200,200);
+            lighting.addChild(light);
             this.makePlayer(100,100);
             new bulletMan(200,200,1);
             new bulletMan(300,200,1);
@@ -77,6 +81,7 @@ class player extends gameObject{
     currentGun: number;
     reloadBar: progressBar;
     ammoCounter: fractionCounter;
+    mask: PIXI.Sprite;
     constructor(x: number, y: number){
         super();
         this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage("res/playerSmile.png"));
@@ -91,7 +96,7 @@ class player extends gameObject{
         foreGroundImage.addChild(this.sprite);
     }
     update(deltaTime: number){
-        this.keyboardManage(deltaTime);
+        this.keyboardManage();
         this.sprite.position.x+=this.mov.x*deltaTime;
         this.sprite.position.y+=this.mov.y*deltaTime;
         this.hitbox = this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
@@ -117,18 +122,18 @@ class player extends gameObject{
         }
         this.guns[this.currentGun].update(deltaTime);
     }
-    keyboardManage(deltaTime: number){
+    keyboardManage(){
         if(keyboard.getKey(87)){//w
-            this.mov.y-=2*deltaTime;
+            this.mov.y-=2;
         }
         if(keyboard.getKey(65)){//a
-            this.mov.x+=-2*deltaTime;
+            this.mov.x+=-2;
         }
         if(keyboard.getKey(83)){//s
-            this.mov.y+=2*deltaTime;
+            this.mov.y+=2;
         }
         if(keyboard.getKey(68)){//d
-            this.mov.x+=2*deltaTime;
+            this.mov.x+=2;
         }
     }
     collision(deltaTime: number){
@@ -282,7 +287,7 @@ class gun{
         if(!this.reloading){
             if(this.currentLoad>0){
                 if(this.shotCooldown<=0){
-                    let angle = rectangle.getAngle(new PIXI.Point(p1.sprite.position.x+p1.sprite.width/2, p1.sprite.position.y+p1.sprite.height/2), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                    let angle = rectangle.getAngle(p1.hitbox.getCenter(), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
                     new bullet(p1.sprite.x+((p1.sprite.width/2)+this.barrelLength)*Math.cos(angle)+p1.sprite.width/2, p1.sprite.y+((p1.sprite.height/2)+this.barrelLength)*Math.sin(angle)+p1.sprite.height/2, angle, this.bulletType,this.fireSpeed,this.dammage, false);
                     this.shotCooldown = this.fireRate;
                     this.currentLoad--;
@@ -724,6 +729,7 @@ export let playerBullets: bullet[] = new Array<bullet>();
 export let enemyBullets: bullet[] = new Array<bullet>();
 export let backGroundImage: PIXI.particles.ParticleContainer = new PIXI.particles.ParticleContainer();
 export let foreGroundImage: PIXI.Container = new PIXI.Container();
+export let lighting: PIXI.particles.ParticleContainer = new PIXI.particles.ParticleContainer();
 let UIImage: PIXI.Container = new PIXI.Container();
 let walls: rectangle[] = new Array<rectangle>();
 let animator: animationHandeler = new animationHandeler();

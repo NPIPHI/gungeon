@@ -8,9 +8,13 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.mouse = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["cursor1.png"]);
             pixiApp.stage.addChild(exports.backGroundImage);
             pixiApp.stage.addChild(exports.foreGroundImage);
+            pixiApp.stage.addChild(exports.lighting);
             pixiApp.stage.addChild(UIImage);
+            UIImage.addChild(this.mouse);
             this.generateFloor();
-            pixiApp.stage.addChild(this.mouse);
+            let light = new PIXI.Sprite(PIXI.loader.resources["res/backGroundTexture.json"].textures["light120.png"]);
+            light.position = new PIXI.Point(200, 200);
+            exports.lighting.addChild(light);
             this.makePlayer(100, 100);
             new enemys_1.bulletMan(200, 200, 1);
             new enemys_1.bulletMan(300, 200, 1);
@@ -84,7 +88,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
-            this.keyboardManage(deltaTime);
+            this.keyboardManage();
             this.sprite.position.x += this.mov.x * deltaTime;
             this.sprite.position.y += this.mov.y * deltaTime;
             this.hitbox = this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
@@ -111,18 +115,18 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             }
             this.guns[this.currentGun].update(deltaTime);
         }
-        keyboardManage(deltaTime) {
+        keyboardManage() {
             if (keyboard_1.default.getKey(87)) {
-                this.mov.y -= 2 * deltaTime;
+                this.mov.y -= 2;
             }
             if (keyboard_1.default.getKey(65)) {
-                this.mov.x += -2 * deltaTime;
+                this.mov.x += -2;
             }
             if (keyboard_1.default.getKey(83)) {
-                this.mov.y += 2 * deltaTime;
+                this.mov.y += 2;
             }
             if (keyboard_1.default.getKey(68)) {
-                this.mov.x += 2 * deltaTime;
+                this.mov.x += 2;
             }
         }
         collision(deltaTime) {
@@ -255,7 +259,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             if (!this.reloading) {
                 if (this.currentLoad > 0) {
                     if (this.shotCooldown <= 0) {
-                        let angle = shapes_1.rectangle.getAngle(new PIXI.Point(exports.p1.sprite.position.x + exports.p1.sprite.width / 2, exports.p1.sprite.position.y + exports.p1.sprite.height / 2), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                        let angle = shapes_1.rectangle.getAngle(exports.p1.hitbox.getCenter(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                         new bullet(exports.p1.sprite.x + ((exports.p1.sprite.width / 2) + this.barrelLength) * Math.cos(angle) + exports.p1.sprite.width / 2, exports.p1.sprite.y + ((exports.p1.sprite.height / 2) + this.barrelLength) * Math.sin(angle) + exports.p1.sprite.height / 2, angle, this.bulletType, this.fireSpeed, this.dammage, false);
                         this.shotCooldown = this.fireRate;
                         this.currentLoad--;
@@ -665,6 +669,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
     exports.enemyBullets = new Array();
     exports.backGroundImage = new PIXI.particles.ParticleContainer();
     exports.foreGroundImage = new PIXI.Container();
+    exports.lighting = new PIXI.particles.ParticleContainer();
     let UIImage = new PIXI.Container();
     let walls = new Array();
     let animator = new animationHandeler();

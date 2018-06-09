@@ -8,6 +8,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
             super();
             this.animImgs = Array();
             this.state = 0;
+            this.legState = 0;
             this.x = x;
             this.y = y;
             this.time = 0;
@@ -49,6 +50,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
                     }
                     if (this.time - this.eventTime > 15) {
                         this.incrememtLegs();
+                        this.eventTime = this.time;
                     }
                     break;
                 case 1:
@@ -117,8 +119,25 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
             gameEngine_1.foreGroundImage.removeChild(this.body);
         }
         incrememtLegs() {
+            this.legState++;
+            this.legState %= 4;
+            if (this.legState == 2 || this.legState == 0) {
+                this.setLegs(0);
+            }
+            else {
+                this.setLegs(this.legState);
+            }
         }
         setLegs(index) {
+            switch (index) {
+                case 0:
+                    this.legs.texture = this.animImgs[4];
+                    break;
+                case 1:
+                    this.legs.texture = this.animImgs[5];
+                case 2:
+                    this.legs.texture = this.animImgs[6];
+            }
         }
     }
     exports.bulletMan = bulletMan;
