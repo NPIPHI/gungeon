@@ -2,7 +2,7 @@
 
 "bulletMan.png":
 {
-	"frame": {"x":0,"y":0,"w":20,"h":30},
+	"frame": {"x":29,"y":3,"w":20,"h":30},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":30},
@@ -10,15 +10,23 @@
 },
 "bulletManBack.png":
 {
-	"frame": {"x":20,"y":0,"w":20,"h":30},
+	"frame": {"x":20,"y":33,"w":20,"h":30},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":30},
 	"sourceSize": {"w":20,"h":30}
 },
+"bulletManDead.png":
+{
+	"frame": {"x":0,"y":3,"w":29,"h":29},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":29,"h":29},
+	"sourceSize": {"w":29,"h":29}
+},
 "bulletManLeft.png":
 {
-	"frame": {"x":40,"y":0,"w":20,"h":30},
+	"frame": {"x":0,"y":33,"w":20,"h":30},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":30},
@@ -26,7 +34,7 @@
 },
 "bulletManLegs0.png":
 {
-	"frame": {"x":0,"y":30,"w":20,"h":3},
+	"frame": {"x":40,"y":0,"w":20,"h":3},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":3},
@@ -34,7 +42,7 @@
 },
 "bulletManLegs1.png":
 {
-	"frame": {"x":20,"y":30,"w":20,"h":3},
+	"frame": {"x":20,"y":0,"w":20,"h":3},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":3},
@@ -42,7 +50,7 @@
 },
 "bulletManLegs2.png":
 {
-	"frame": {"x":40,"y":30,"w":20,"h":3},
+	"frame": {"x":0,"y":0,"w":20,"h":3},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":3},
@@ -50,7 +58,7 @@
 },
 "bulletManRight.png":
 {
-	"frame": {"x":0,"y":33,"w":20,"h":30},
+	"frame": {"x":40,"y":33,"w":20,"h":30},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":30},
@@ -63,6 +71,6 @@
 	"format": "RGBA8888",
 	"size": {"w":60,"h":63},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:9d1a4f79feac561d7a10302503b45492:929a94f5e5c5423597b106429730357e:a5fe7db4b869eb0f3e0b2940b9577ea8$"
+	"smartupdate": "$TexturePacker:SmartUpdate:e9ff8efea0a9fbe1545c4fa8523f47cc:f7d5f49c001e83bd1ccbce06bec73e84:a5fe7db4b869eb0f3e0b2940b9577ea8$"
 }
 }

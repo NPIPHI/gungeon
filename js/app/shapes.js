@@ -11,6 +11,7 @@ define(["require", "exports"], function (require, exports) {
             return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
         }
     }
+    exports.shape = shape;
     class rectangle extends shape {
         constructor(x, y, width, height) {
             super();
@@ -75,6 +76,15 @@ define(["require", "exports"], function (require, exports) {
         }
         getCenter() {
             return new PIXI.Point(this.x, this.y);
+        }
+        intersects(rect) {
+            return true;
+        }
+        touches(rect) {
+            return true;
+        }
+        translateAbsolute(x, y) {
+            return new circle(x, y, this.radius);
         }
     }
     exports.circle = circle;

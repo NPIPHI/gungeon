@@ -1,56 +1,29 @@
 import gameObject from "./gameObject";
-import {foreGroundImage, gameEngine, p1, playerBullets} from "./gameEngine";
+import {foreGroundImage, gameEngine, p1, playerBullets, currentRoom} from "./gameEngine";
 import {rectangle} from "./shapes";
 
 abstract class enemy extends gameObject{
-
-}
-
-
-export class bulletMan extends enemy{
-    body: PIXI.Sprite;
-    legs: PIXI.Sprite;
-    animImgs: PIXI.Texture[] = Array<PIXI.Texture>();
-    AI: number; //the type of enemy behavior
     hp: number;
-    speed: number;
     x: number;
     y: number;
     time: number;
-    eventTime: number;
     hitbox: rectangle;
+}
+
+
+abstract class walker extends enemy{
+    body: PIXI.Sprite;
+    legs: PIXI.Sprite;
+    speed: number;
+    eventTime: number;
+    dx: number;
+    dy: number;
     state: number = 0; //0 is moving, 1 is shooting, 2 is reloading
     legState: number = 0; //0 and 2 are straight
-    constructor(x: number, y: number, enemyType: number){
+    friction: number;//what to multiply dx and dy by every frame
+    animImgs: PIXI.Texture[] = Array<PIXI.Texture>();
+    constructor(){
         super();
-        this.x = x;
-        this.y = y;
-        this.time = 0;
-        this.getTypeProperties(enemyType);
-        foreGroundImage.addChild(this.body);
-        this.body.addChild(this.legs);
-    }
-    getTypeProperties(type: number){
-        switch(type){
-            case 1:
-                this.AI = 1;
-                this.hp = 20;
-                this.speed=3;
-                this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
-                this.legs = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManBack.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLeft.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManRight.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs1.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs2.png"]);
-                break;
-        }
-        this.body.position.x = this.x;
-        this.body.position.y = this.y;
-        this.legs.position.y = this.body.height;
-        this.hitbox = new rectangle(this.x,this.y,this.body.width,this.body.height+this.legs.height);
     }
     update(deltaTime: number){
         this.time+= deltaTime;
@@ -94,16 +67,29 @@ export class bulletMan extends enemy{
                 if(bul.hitbox.touches(this.hitbox)){
                     bul.destroy();
                     this.hp-=bul.dammage;
+                    this.dx += Math.cos(bul.heading)*0.1*(bul.speed*bul.dammage);
+                    this.dy += Math.sin(bul.heading)*0.1*(bul.speed*bul.dammage);
                     if(this.hp<=0){
+                        this.dx = Math.cos(bul.heading)*Math.sqrt(bul.speed*bul.dammage);
+                        this.dy = -Math.sin(bul.heading)*Math.sqrt(bul.speed*bul.dammage);
                         this.destroy();
                     }
                 }
             });
-        this.body.x=this.x;
+        this.x+=this.dx;
+        this.y+=this.dy;
+        let modFric=this.getFrictionModifyer();
+        this.dx*=this.friction*modFric;
+        this.dy*=this.friction*modFric;
+        this.body.x = this.x;
         this.body.y = this.y;
     }
-    shoot(){
-        gameEngine.makeBullet(this.hitbox.getCenter().x, this.hitbox.getCenter().y, rectangle.getAngle(this.hitbox.getCenter(), p1.hitbox.getCenter()),3,4,1,true);
+    moveTo(deltaTime: number, angle: number){
+        this.dx+=deltaTime*Math.cos(angle)*this.speed;
+        this.dy+=deltaTime*Math.sin(angle)*this.speed;
+    }
+    getFrictionModifyer():number{
+        return 1;
     }
     changeState(state: number){
         switch(state){
@@ -120,13 +106,53 @@ export class bulletMan extends enemy{
         }
         this.eventTime = this.time;
     }
-    moveTo(deltaTime: number, angle: number){
-        this.x+=deltaTime*Math.cos(angle)*2;
-        this.y+=deltaTime*Math.sin(angle)*2;
+    abstract setLegs(index: number):void;
+    abstract shoot():void;
+    abstract incrememtLegs():void;
+}
+export class bulletMan extends walker{
+    AI: number; //the type of enemy behavior
+    constructor(x: number, y: number, enemyType: number){
+        super();
+        this.x = x;
+        this.y = y;
+        this.dx = 0;
+        this.dy = 0;
+        this.time = 0;
+        this.getTypeProperties(enemyType);
+        foreGroundImage.addChild(this.body);
+        this.body.addChild(this.legs);
+    }
+    getTypeProperties(type: number){
+        switch(type){
+            case 1:
+                this.AI = 1;
+                this.hp = 200;
+                this.speed=3;
+                this.friction = 0.3;
+                this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
+                this.legs = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
+                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
+                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManBack.png"]);
+                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLeft.png"]);
+                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManRight.png"]);
+                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
+                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs1.png"]);
+                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs2.png"]);
+                break;
+        }
+        this.body.position.x = this.x;
+        this.body.position.y = this.y;
+        this.legs.position.y = this.body.height;
+        this.hitbox = new rectangle(this.x,this.y,this.body.width,this.body.height+this.legs.height);
+    }
+    shoot():void{
+        gameEngine.makeBullet(this.hitbox.getCenter().x, this.hitbox.getCenter().y, rectangle.getAngle(this.hitbox.getCenter(), p1.hitbox.getCenter()),3,4,1,true);
     }
     destroy(){
         super.destroy();
         foreGroundImage.removeChild(this.body);
+        currentRoom.addFloorObject(this.body.position.x,this.body.position.y,1,this.dx,-this.dy);
     }
     incrememtLegs(){
         this.legState++;

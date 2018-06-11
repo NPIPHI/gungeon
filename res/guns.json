@@ -2,139 +2,139 @@
 
 "barrelMachineGun.png":
 {
-	"frame": {"x":114,"y":34,"w":98,"h":40},
+	"frame": {"x":57,"y":17,"w":49,"h":20},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":98,"h":40},
-	"sourceSize": {"w":98,"h":40}
+	"spriteSourceSize": {"x":0,"y":0,"w":49,"h":20},
+	"sourceSize": {"w":49,"h":20}
 },
 "barrelWood.png":
 {
-	"frame": {"x":0,"y":120,"w":96,"h":46},
+	"frame": {"x":0,"y":60,"w":48,"h":23},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":46},
-	"sourceSize": {"w":96,"h":46}
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":23},
+	"sourceSize": {"w":48,"h":23}
 },
 "blackAK.png":
 {
-	"frame": {"x":82,"y":170,"w":98,"h":52},
+	"frame": {"x":41,"y":85,"w":49,"h":26},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":98,"h":52},
-	"sourceSize": {"w":98,"h":52}
+	"spriteSourceSize": {"x":0,"y":0,"w":49,"h":26},
+	"sourceSize": {"w":49,"h":26}
 },
 "blackGrenadeLauncher.png":
 {
-	"frame": {"x":0,"y":74,"w":102,"h":41},
+	"frame": {"x":0,"y":37,"w":51,"h":20},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":102,"h":41},
-	"sourceSize": {"w":102,"h":41}
+	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":20},
+	"sourceSize": {"w":51,"h":20}
 },
 "blackPistol.png":
 {
-	"frame": {"x":0,"y":0,"w":38,"h":34},
+	"frame": {"x":0,"y":0,"w":19,"h":17},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":38,"h":34},
-	"sourceSize": {"w":38,"h":34}
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":17},
+	"sourceSize": {"w":19,"h":17}
 },
 "blackSidearm.png":
 {
-	"frame": {"x":38,"y":0,"w":40,"h":34},
+	"frame": {"x":19,"y":0,"w":20,"h":17},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":34},
-	"sourceSize": {"w":40,"h":34}
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":17},
+	"sourceSize": {"w":20,"h":17}
 },
 "blackSMG.png":
 {
-	"frame": {"x":128,"y":228,"w":100,"h":64},
+	"frame": {"x":64,"y":114,"w":50,"h":32},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":64},
-	"sourceSize": {"w":100,"h":64}
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":32},
+	"sourceSize": {"w":50,"h":32}
 },
 "blackSniper.png":
 {
-	"frame": {"x":0,"y":228,"w":128,"h":58},
+	"frame": {"x":0,"y":114,"w":64,"h":29},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":58},
-	"sourceSize": {"w":128,"h":58}
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":29},
+	"sourceSize": {"w":64,"h":29}
 },
 "dEagle.png":
 {
-	"frame": {"x":0,"y":34,"w":64,"h":38},
+	"frame": {"x":0,"y":17,"w":32,"h":19},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":38},
-	"sourceSize": {"w":64,"h":38}
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":19},
+	"sourceSize": {"w":32,"h":19}
 },
 "ivorySniper.png":
 {
-	"frame": {"x":102,"y":74,"w":103,"h":46},
+	"frame": {"x":51,"y":37,"w":51,"h":23},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":103,"h":46},
-	"sourceSize": {"w":103,"h":46}
+	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":23},
+	"sourceSize": {"w":51,"h":23}
 },
 "metalSidearm.png":
 {
-	"frame": {"x":174,"y":0,"w":36,"h":34},
+	"frame": {"x":87,"y":0,"w":18,"h":17},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":36,"h":34},
-	"sourceSize": {"w":36,"h":34}
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":17},
+	"sourceSize": {"w":18,"h":17}
 },
 "nailGun.png":
 {
-	"frame": {"x":0,"y":170,"w":82,"h":50},
+	"frame": {"x":0,"y":85,"w":41,"h":25},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":82,"h":50},
-	"sourceSize": {"w":82,"h":50}
+	"spriteSourceSize": {"x":0,"y":0,"w":41,"h":25},
+	"sourceSize": {"w":41,"h":25}
 },
 "shotGun.png":
 {
-	"frame": {"x":78,"y":0,"w":96,"h":34},
+	"frame": {"x":39,"y":0,"w":48,"h":17},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":34},
-	"sourceSize": {"w":96,"h":34}
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":17},
+	"sourceSize": {"w":48,"h":17}
 },
 "uzi.png":
 {
-	"frame": {"x":180,"y":170,"w":66,"h":58},
+	"frame": {"x":90,"y":85,"w":33,"h":29},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":66,"h":58},
-	"sourceSize": {"w":66,"h":58}
+	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":29},
+	"sourceSize": {"w":33,"h":29}
 },
 "woodAK.png":
 {
-	"frame": {"x":96,"y":120,"w":100,"h":50},
+	"frame": {"x":48,"y":60,"w":50,"h":25},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":50},
-	"sourceSize": {"w":100,"h":50}
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":25},
+	"sourceSize": {"w":50,"h":25}
 },
 "woodSidearm.png":
 {
-	"frame": {"x":64,"y":34,"w":50,"h":38},
+	"frame": {"x":32,"y":17,"w":25,"h":19},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":38},
-	"sourceSize": {"w":50,"h":38}
+	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":19},
+	"sourceSize": {"w":25,"h":19}
 }},
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "guns.png",
 	"format": "RGBA8888",
-	"size": {"w":246,"h":292},
+	"size": {"w":123,"h":146},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:37f567a23f1792418d5012642d080db8:0d7715c15482e1db110b70f54e5c835b:62c1f540b5fd80b9e41584087e1ed9b4$"
+	"smartupdate": "$TexturePacker:SmartUpdate:fd7064c2a92350229ed74ee15a3f52cd:84aeb5624b110c901002055f74676014:62c1f540b5fd80b9e41584087e1ed9b4$"
 }
 }

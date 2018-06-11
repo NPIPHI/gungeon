@@ -3,40 +3,12 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
     Object.defineProperty(exports, "__esModule", { value: true });
     class enemy extends gameObject_1.default {
     }
-    class bulletMan extends enemy {
-        constructor(x, y, enemyType) {
+    class walker extends enemy {
+        constructor() {
             super();
-            this.animImgs = Array();
             this.state = 0;
             this.legState = 0;
-            this.x = x;
-            this.y = y;
-            this.time = 0;
-            this.getTypeProperties(enemyType);
-            gameEngine_1.foreGroundImage.addChild(this.body);
-            this.body.addChild(this.legs);
-        }
-        getTypeProperties(type) {
-            switch (type) {
-                case 1:
-                    this.AI = 1;
-                    this.hp = 20;
-                    this.speed = 3;
-                    this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
-                    this.legs = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
-                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
-                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManBack.png"]);
-                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLeft.png"]);
-                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManRight.png"]);
-                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
-                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs1.png"]);
-                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs2.png"]);
-                    break;
-            }
-            this.body.position.x = this.x;
-            this.body.position.y = this.y;
-            this.legs.position.y = this.body.height;
-            this.hitbox = new shapes_1.rectangle(this.x, this.y, this.body.width, this.body.height + this.legs.height);
+            this.animImgs = Array();
         }
         update(deltaTime) {
             this.time += deltaTime;
@@ -84,16 +56,29 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
                 if (bul.hitbox.touches(this.hitbox)) {
                     bul.destroy();
                     this.hp -= bul.dammage;
+                    this.dx += Math.cos(bul.heading) * 0.1 * (bul.speed * bul.dammage);
+                    this.dy += Math.sin(bul.heading) * 0.1 * (bul.speed * bul.dammage);
                     if (this.hp <= 0) {
+                        this.dx = Math.cos(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
+                        this.dy = -Math.sin(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
                         this.destroy();
                     }
                 }
             });
+            this.x += this.dx;
+            this.y += this.dy;
+            let modFric = this.getFrictionModifyer();
+            this.dx *= this.friction * modFric;
+            this.dy *= this.friction * modFric;
             this.body.x = this.x;
             this.body.y = this.y;
         }
-        shoot() {
-            gameEngine_1.gameEngine.makeBullet(this.hitbox.getCenter().x, this.hitbox.getCenter().y, shapes_1.rectangle.getAngle(this.hitbox.getCenter(), gameEngine_1.p1.hitbox.getCenter()), 3, 4, 1, true);
+        moveTo(deltaTime, angle) {
+            this.dx += deltaTime * Math.cos(angle) * this.speed;
+            this.dy += deltaTime * Math.sin(angle) * this.speed;
+        }
+        getFrictionModifyer() {
+            return 1;
         }
         changeState(state) {
             switch (state) {
@@ -110,13 +95,49 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
             }
             this.eventTime = this.time;
         }
-        moveTo(deltaTime, angle) {
-            this.x += deltaTime * Math.cos(angle) * 2;
-            this.y += deltaTime * Math.sin(angle) * 2;
+    }
+    class bulletMan extends walker {
+        constructor(x, y, enemyType) {
+            super();
+            this.x = x;
+            this.y = y;
+            this.dx = 0;
+            this.dy = 0;
+            this.time = 0;
+            this.getTypeProperties(enemyType);
+            gameEngine_1.foreGroundImage.addChild(this.body);
+            this.body.addChild(this.legs);
+        }
+        getTypeProperties(type) {
+            switch (type) {
+                case 1:
+                    this.AI = 1;
+                    this.hp = 200;
+                    this.speed = 3;
+                    this.friction = 0.3;
+                    this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
+                    this.legs = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
+                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
+                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManBack.png"]);
+                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLeft.png"]);
+                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManRight.png"]);
+                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
+                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs1.png"]);
+                    this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs2.png"]);
+                    break;
+            }
+            this.body.position.x = this.x;
+            this.body.position.y = this.y;
+            this.legs.position.y = this.body.height;
+            this.hitbox = new shapes_1.rectangle(this.x, this.y, this.body.width, this.body.height + this.legs.height);
+        }
+        shoot() {
+            gameEngine_1.gameEngine.makeBullet(this.hitbox.getCenter().x, this.hitbox.getCenter().y, shapes_1.rectangle.getAngle(this.hitbox.getCenter(), gameEngine_1.p1.hitbox.getCenter()), 3, 4, 1, true);
         }
         destroy() {
             super.destroy();
             gameEngine_1.foreGroundImage.removeChild(this.body);
+            gameEngine_1.currentRoom.addFloorObject(this.body.position.x, this.body.position.y, 1, this.dx, -this.dy);
         }
         incrememtLegs() {
             this.legState++;

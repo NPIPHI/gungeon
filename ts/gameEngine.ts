@@ -1,5 +1,5 @@
 ///<reference types="pixi.js"/>
-import {rectangle} from "./shapes";
+import {rectangle,shape} from "./shapes";
 import keyboard from "./keyboard";
 import gameObject from "./gameObject";
 import {bulletMan} from "./enemys";
@@ -11,14 +11,13 @@ export class gameEngine{
             timeDilate = 1;
             this.mouse = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["cursor1.png"]);
             pixiApp.stage.addChild(backGroundImage);
+            pixiApp.stage.addChild(midGroundImage);
             pixiApp.stage.addChild(foreGroundImage);
             pixiApp.stage.addChild(lighting);
             pixiApp.stage.addChild(UIImage);
             UIImage.addChild(this.mouse);
             this.generateFloor();           
-            let light = new PIXI.Sprite(PIXI.loader.resources["res/backGroundTexture.json"].textures["light120.png"]);
-            light.position = new PIXI.Point(200,200);
-            lighting.addChild(light);
+            currentRoom = new room(new rectangle(0,0,0,0));
             this.makePlayer(100,100);
             new bulletMan(200,200,1);
             new bulletMan(300,200,1);
@@ -34,6 +33,7 @@ export class gameEngine{
         gameObjects.forEach(element => {
             element.update(deltaTime*timeDilate);
         });
+        currentRoom.update();
         removeGameObjects.forEach(obj=>{
             gameObjects.splice(gameObjects.indexOf(obj),1);
         });
@@ -182,7 +182,7 @@ class bullet extends gameObject{
     speed: number;
     dammage: number;
     heading: number;
-    hitbox: rectangle;
+    hitbox: shape;
     isDestroyed: boolean = false;
     type: number;
     enemy: boolean; 
@@ -236,7 +236,32 @@ class bullet extends gameObject{
                 return PIXI.loader.resources["res/bullets.json"].textures["crossBolt.png"];
             case 3: 
                 return PIXI.loader.resources["res/bullets.json"].textures["smallRed.png"];
+            case 4:
+                return PIXI.Texture.WHITE;
         }
+    }
+}
+
+
+class explosion extends bullet{
+    framePassed: boolean = false;
+    constructor(x: number, y: number,radius: number,type: number, dammage: number){
+        super(x,y,0,type,0,dammage, true);
+        playerBullets.push(this);
+    }    
+    update(){
+        if(this.framePassed){
+            
+        } else {
+            this.framePassed = true;
+        }
+    }
+    destroy(){
+
+    }
+    expire(){
+        enemyBullets.splice(enemyBullets.indexOf(this),1);
+        playerBullets.splice(playerBullets.indexOf(this),1);
     }
 }
 
@@ -244,7 +269,6 @@ class bullet extends gameObject{
 class gun{
     fireRate: number; //period. 60s of a second
     dammage: number; //dammage of bullet
-    barrelLength: number; //distance from player the bullet spawns
     bulletType: number; //type of bullet
     sprite: PIXI.Sprite; //sprite
     fireSpeed: number; //bullet speed
@@ -258,22 +282,29 @@ class gun{
     shotCooldown: number = 0; //time untill can shoot again
     automatic: boolean; //if fire can be held down
     isActive: boolean; //if the gun is the current gun of player
+    barrelDist: number; //the distance from the pivot to the barrel
+    barrelAngle: number; //the angle from the pivot to the barrel 
+    bulletSpread: number;  //the angle that bullets are spread 1 degree means max 0.5 deg left and right
+    barrel: PIXI.Point;
     constructor(type: number,){
         this.getTypePropeties(type);
+        foreGroundImage.addChild(this.sprite);
     }
     getTypePropeties(type: number){
         let gun;
         switch(type){
             case 1:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.pistol;
+                this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackPistol.png"]);
                 break;
             case 2: 
-                gun = PIXI.loader.resources["res/gunData.json"].data.guns.crossBow;
+                gun = PIXI.loader.resources["res/gunData.json"].data.guns.AK_47;
+                this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["woodAK.png"]);
         }
+        this.sprite.pivot = new PIXI.Point(gun.handle.x,gun.handle.y);
         this.fireRate = gun.fireRate;
         this.fireSpeed = gun.fireSpeed;
         this.dammage = gun.dammage;
-        this.barrelLength = gun.barrelLength;
         this.bulletType = gun.bulletType;
         this.capacity = gun.capacity;
         this.reloadTime = gun.reloadTime;
@@ -282,17 +313,58 @@ class gun{
         this.currentLoad = this.capacity;
         this.automatic = gun.automatic;
         this.isActive = false;
+        this.bulletSpread = gun.bulletSpread;
+        this.barrelAngle = Math.atan2(gun.barrel.y-gun.handle.y,gun.barrel.x-gun.handle.x);
+        this.barrelDist = rectangle.getDistance(new PIXI.Point(gun.handle.x,gun.handle.y),new PIXI.Point(gun.barrel.x,gun.barrel.y));
+        this.barrel = new PIXI.Point(gun.barrel.x,gun.barrel.y);
+    }
+    calcGunPosition(){
+        if(p1.hitbox.getCenter().x<keyboard.mouseX){//right
+            if(p1.hitbox.getCenter().y<keyboard.mouseY){//bottom
+                this.sprite.scale.x=1;
+                this.sprite.x = p1.hitbox.x+p1.hitbox.width;
+                this.sprite.y = p1.hitbox.getCenter().y;
+                this.sprite.rotation = rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+            } else {
+                this.sprite.scale.x=-1;
+                this.sprite.x = p1.hitbox.x+p1.hitbox.width;
+                this.sprite.y = p1.hitbox.getCenter().y;
+                this.sprite.rotation = Math.PI+rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+            }
+        } else{//left
+            if(p1.hitbox.getCenter().y<keyboard.mouseY){
+                this.sprite.scale.x = -1;
+                this.sprite.x = p1.hitbox.x;
+                this.sprite.y = p1.hitbox.getCenter().y;
+                this.sprite.rotation = Math.PI+rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+            } else {
+                this.sprite.scale.x=1;
+                this.sprite.x = p1.hitbox.x;
+                this.sprite.y = p1.hitbox.getCenter().y;
+                this.sprite.rotation = rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+            }
+        }
+    }
+    getBarrelPoistion():PIXI.Point{
+        if(this.sprite.scale.x==1){
+            return new PIXI.Point(this.sprite.x+Math.cos(this.barrelAngle+this.sprite.rotation)*this.barrelDist,this.sprite.y+Math.sin(this.barrelAngle+this.sprite.rotation)*this.barrelDist);
+        } else {
+            return new PIXI.Point(2*(this.sprite.x+Math.cos(this.sprite.rotation-Math.PI/2)*(this.sprite.pivot.y-this.barrel.y))-(this.sprite.x+Math.cos(this.barrelAngle+this.sprite.rotation)*this.barrelDist),2*(this.sprite.y+Math.sin(this.sprite.rotation-Math.PI/2)*(this.sprite.pivot.y-this.barrel.y))-(this.sprite.y+Math.sin(this.barrelAngle+this.sprite.rotation)*this.barrelDist));
+        }
     }
     shoot(){
         if(!this.reloading){
             if(this.currentLoad>0){
                 if(this.shotCooldown<=0){
-                    let angle = rectangle.getAngle(p1.hitbox.getCenter(), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
-                    new bullet(p1.sprite.x+((p1.sprite.width/2)+this.barrelLength)*Math.cos(angle)+p1.sprite.width/2, p1.sprite.y+((p1.sprite.height/2)+this.barrelLength)*Math.sin(angle)+p1.sprite.height/2, angle, this.bulletType,this.fireSpeed,this.dammage, false);
+                    let angle = rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                    new bullet(this.getBarrelPoistion().x,this.getBarrelPoistion().y, angle+(Math.random()-0.5)*this.bulletSpread, this.bulletType,this.fireSpeed,this.dammage, false);
                     this.shotCooldown = this.fireRate;
                     this.currentLoad--;
                     this.currentRounds--;
                     p1.ammoCounter.setValue(this.currentLoad,this.currentRounds);
+                    if(this.capacity==1){
+                        this.reload();
+                    }
                 }
             } else{
                 this.reload();
@@ -303,15 +375,20 @@ class gun{
         this.reloading = false;
         this.reloadProg = 0;
         this.isActive = false;
+        this.sprite.visible = false;
     }
     switchGunIn(ammoCounter: fractionCounter, reloadBar: progressBar){
         ammoCounter.setValue(this.currentLoad,this.currentRounds);
         reloadBar.limit = this.reloadTime;
         reloadBar.hide();
+        this.sprite.position.x = 0;
+        this.sprite.position.y = 0;
         this.isActive = true;
         this.shotCooldown=this.fireRate;
+        this.sprite.visible = true;
     }
     update(deltaTime: number){
+        this.calcGunPosition();
         if(this.reloading){
             this.reloadProg+=deltaTime;
             if(this.reloadProg>=this.reloadTime){
@@ -354,6 +431,78 @@ class gun{
 }
 
 
+class floorObject{
+    sprite: PIXI.Sprite;
+    dx: number;
+    dy: number;
+    owner: room;
+    type: number;
+    constructor(x: number, y: number, type: number, dx: number, dy: number, owner: room){
+        this.getTypeProperties(type);
+        this.sprite.position.x = x;
+        this.sprite.position.y = y;
+        this.dy = dy;
+        this.dx = dx;
+        this.owner = owner;
+        this.type = type;
+        midGroundImage.addChild(this.sprite);
+        owner.floorObjects.push(this);
+    }
+    update(){
+        if(Math.abs(this.dx)>0.5||Math.abs(this.dy)>0.5){
+            this.dx*=0.90;
+            this.dy*=0.90;
+            this.sprite.position.x += this.dx;
+            this.sprite.position.y += this.dy;
+        }
+    }
+    getTypeProperties(type: number){
+        switch(type){
+            case 1: 
+                this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManDead.png"]);
+                break;
+        }
+    }
+    compress(){
+        midGroundImage.removeChild(this.sprite);
+        this.owner.addCompressed(this.sprite.position.x,this.sprite.position.y,this.type);
+        this.owner.floorObjects.splice(this.owner.floorObjects.indexOf(this),1);
+    }
+}
+class room{
+    floorObjects: floorObject[] = Array<floorObject>(); 
+    compressed: {x: number,y: number, type: number}[];
+    constructor(shape: rectangle){
+
+    }
+    update(){
+        this.floorObjects.forEach(element => {
+            element.update();
+        });
+    }
+    exit(){
+
+    }
+    compress(){
+        this.floorObjects.forEach(e => {
+            e.compress();
+        })
+    }
+    enter(){
+
+    }
+    uncompress(){
+        this.compressed.forEach(element => {
+            new floorObject(element.x,element.y,element.type,0,0,this);
+        });
+    }
+    addCompressed(x: number, y: number, type: number){
+        this.compressed.push({x,y,type});
+    }
+    addFloorObject(x: number, y: number, type: number, dx: number, dy: number){
+        new floorObject(x,y,type,dx,dy,this);
+    }
+}
 class wall{
     rect: rectangle;
     constructor(x: number, y:number, w:number, h:number){
@@ -729,7 +878,9 @@ export let playerBullets: bullet[] = new Array<bullet>();
 export let enemyBullets: bullet[] = new Array<bullet>();
 export let backGroundImage: PIXI.particles.ParticleContainer = new PIXI.particles.ParticleContainer();
 export let foreGroundImage: PIXI.Container = new PIXI.Container();
+export let midGroundImage: PIXI.Container = new PIXI.Container();
 export let lighting: PIXI.particles.ParticleContainer = new PIXI.particles.ParticleContainer();
+export let currentRoom: room;
 let UIImage: PIXI.Container = new PIXI.Container();
 let walls: rectangle[] = new Array<rectangle>();
 let animator: animationHandeler = new animationHandeler();

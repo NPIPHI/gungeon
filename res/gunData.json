@@ -5,11 +5,13 @@
             "fireRate": 10,
             "fireSpeed" : 8,
             "dammage" : 5,
-            "barrelLength" : 1,
             "bulletType": 1,
             "capacity": 8,
             "reloadTime": 60,
             "totalCapacity": 200,
+            "handle": {"x":5, "y":17},
+            "barrel": {"x": 19, "y": 3},
+            "bulletSpread": 0.069,
             "automatic": true
 
         },
@@ -17,13 +19,27 @@
             "fireRate": 40,
             "fireSpeed" : 6,
             "dammage" : 40,
-            "barrelLength" : 1,
             "bulletType": 2,
             "capacity": 1,
             "reloadTime": 30,
             "totalCapacity": 100,
+            "handle": {"x":10, "y":34},
+            "barrel": {"x": 38, "y": 8},
+            "bulletSpread": 0,
             "automatic": false
-
+        },
+        "AK_47":{
+            "fireRate": 5,
+            "fireSpeed" : 9,
+            "dammage" : 3,
+            "bulletType": 1,
+            "capacity": 50,
+            "reloadTime": 40,
+            "totalCapacity": 500,
+            "handle": {"x":16, "y":20},
+            "barrel": {"x": 49, "y": 6},
+            "bulletSpread": 0.17,
+            "automatic": true
         }
     }
 }

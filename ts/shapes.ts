@@ -1,6 +1,7 @@
+import { Circle } from "pixi.js";
 
 
-abstract class shape{
+export abstract class shape{
     constructor(){
     }
     static getAngle(p1: PIXI.Point, p2: PIXI.Point):number{
@@ -9,7 +10,10 @@ abstract class shape{
     static getDistance(p1: PIXI.Point, p2: PIXI.Point):number{
         return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
     }
+    abstract touches(rect: rectangle):boolean;
+    abstract intersects(rect: rectangle):boolean;
     abstract getCenter():PIXI.Point;
+    abstract translateAbsolute(x: number, y: number):shape;
 }
 export class rectangle extends shape{
     readonly x: number;
@@ -87,5 +91,14 @@ export class circle extends shape{
     }
     getCenter():PIXI.Point{
         return new PIXI.Point(this.x,this.y);
+    }
+    intersects(rect: rectangle):boolean{
+        return true;
+    }
+    touches(rect: rectangle):boolean{
+        return true
+    }
+    translateAbsolute(x: number, y: number):shape{
+        return new circle(x,y,this.radius);
     }
 }

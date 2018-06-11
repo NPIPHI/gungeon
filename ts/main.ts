@@ -7,6 +7,7 @@ PIXI.loader.add("res/bullets.json");
 PIXI.loader.add("res/UIElements.json");
 PIXI.loader.add("res/gunData.json");
 PIXI.loader.add("res/characters.json");
+PIXI.loader.add("res/guns.json");
 PIXI.loader.load(setup);
 function setup() {
   function gameLoop(delta: number) {
