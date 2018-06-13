@@ -14,6 +14,7 @@ abstract class enemy extends gameObject{
 abstract class walker extends enemy{
     body: PIXI.Sprite;
     legs: PIXI.Sprite;
+    gun: PIXI.Sprite;
     speed: number;
     eventTime: number;
     dx: number;
@@ -22,10 +23,13 @@ abstract class walker extends enemy{
     legState: number = 0; //0 and 2 are straight
     friction: number;//what to multiply dx and dy by every frame
     animImgs: PIXI.Texture[] = Array<PIXI.Texture>();
+    target: PIXI.Point;
     constructor(){
         super();
+        this.target = new PIXI.Point(0,0);
     }
     update(deltaTime: number){
+        this.target = p1.hitbox.getCenter();
         this.time+= deltaTime;
         switch(this.state){
             case 0:
@@ -111,7 +115,11 @@ abstract class walker extends enemy{
     abstract incrememtLegs():void;
 }
 export class bulletMan extends walker{
+
     AI: number; //the type of enemy behavior
+    barrelDist: number; //the distance from the pivot to the barrel
+    barrelAngle: number; //the angle from the pivot to the barrel 
+    barrel: PIXI.Point;
     constructor(x: number, y: number, enemyType: number){
         super();
         this.x = x;
@@ -121,13 +129,19 @@ export class bulletMan extends walker{
         this.time = 0;
         this.getTypeProperties(enemyType);
         foreGroundImage.addChild(this.body);
+        foreGroundImage.addChild(this.gun);
         this.body.addChild(this.legs);
     }
+    update(deltaTime: number){
+        super.update(deltaTime);
+        this.calcGunPosition();
+    }
     getTypeProperties(type: number){
+        let gunData;
         switch(type){
             case 1:
                 this.AI = 1;
-                this.hp = 200;
+                this.hp = 20;
                 this.speed=3;
                 this.friction = 0.3;
                 this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
@@ -139,20 +153,63 @@ export class bulletMan extends walker{
                 this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
                 this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs1.png"]);
                 this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs2.png"]);
+                this.gun = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackPistol.png"]);
+                gunData = PIXI.loader.resources["res/gunData.json"].data.guns.blackPistol   ;
                 break;
         }
+        this.gun.pivot = new PIXI.Point(gunData.handle.x,gunData.handle.y);
+        this.barrelAngle = Math.atan2(gunData.barrel.y-gunData.handle.y,gunData.barrel.x-gunData.handle.x);
+        this.barrelDist = rectangle.getDistance(new PIXI.Point(gunData.handle.x,gunData.handle.y),new PIXI.Point(gunData.barrel.x,gunData.barrel.y));
+        this.barrel = new PIXI.Point(gunData.barrel.x,gunData.barrel.y);
         this.body.position.x = this.x;
         this.body.position.y = this.y;
         this.legs.position.y = this.body.height;
         this.hitbox = new rectangle(this.x,this.y,this.body.width,this.body.height+this.legs.height);
     }
     shoot():void{
-        gameEngine.makeBullet(this.hitbox.getCenter().x, this.hitbox.getCenter().y, rectangle.getAngle(this.hitbox.getCenter(), p1.hitbox.getCenter()),3,4,1,true);
+        let posit: PIXI.Point = this.getBarrelPoistion();
+        gameEngine.makeBullet(posit.x, posit.y, rectangle.getAngle(posit, this.target),3,4,1,true);
+    }
+    calcGunPosition(){
+        if(this.hitbox.getCenter().x<p1.hitbox.x){//right
+            if(this.hitbox.getCenter().y<this.target.y){//bottom
+                this.gun.scale.x=1;
+                this.gun.x = this.hitbox.x+this.hitbox.width;
+                this.gun.y = this.hitbox.getCenter().y;
+                this.gun.rotation = rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
+            } else {
+                this.gun.scale.x=-1;
+                this.gun.x = this.hitbox.x+this.hitbox.width;
+                this.gun.y = this.hitbox.getCenter().y;
+                this.gun.rotation = Math.PI+rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
+            }
+        } else{//left
+            if(this.hitbox.getCenter().y<this.target.y){
+                this.gun.scale.x = -1;
+                this.gun.x = this.hitbox.x;
+                this.gun.y = this.hitbox.getCenter().y;
+                this.gun.rotation = Math.PI+rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
+            } else {
+                this.gun.scale.x=1;
+                this.gun.x = this.hitbox.x;
+                this.gun.y = this.hitbox.getCenter().y;
+                this.gun.rotation = rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
+            }
+        }
+    }
+    getBarrelPoistion():PIXI.Point{
+        if(this.gun.scale.x==1){
+            return new PIXI.Point(this.gun.x+Math.cos(this.barrelAngle+this.gun.rotation)*this.barrelDist,this.gun.y+Math.sin(this.barrelAngle+this.gun.rotation)*this.barrelDist);
+        } else {
+            return new PIXI.Point(2*(this.gun.x+Math.cos(this.gun.rotation-Math.PI/2)*(this.gun.pivot.y-this.barrel.y))-(this.gun.x+Math.cos(this.barrelAngle+this.gun.rotation)*this.barrelDist),2*(this.gun.y+Math.sin(this.gun.rotation-Math.PI/2)*(this.gun.pivot.y-this.barrel.y))-(this.gun.y+Math.sin(this.barrelAngle+this.gun.rotation)*this.barrelDist));
+        }
     }
     destroy(){
         super.destroy();
         foreGroundImage.removeChild(this.body);
-        currentRoom.addFloorObject(this.body.position.x,this.body.position.y,1,this.dx,-this.dy);
+        foreGroundImage.removeChild(this.gun);
+        currentRoom.addFloorObject(this.hitbox.getCenter().x,this.hitbox.getCenter().y,1,this.dx,-this.dy);
+        currentRoom.addFloorObjectAdv(this.body.position.x+this.hitbox.width, this.body.position.y+10, 2, this.dx*2,-this.dy*1.5,this.gun.rotation,0.5);
     }
     incrememtLegs(){
         this.legState++;

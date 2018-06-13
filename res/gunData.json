@@ -1,7 +1,6 @@
-
 {
     "guns": {
-        "pistol":{
+        "blackPistol":{
             "fireRate": 10,
             "fireSpeed" : 8,
             "dammage" : 5,
@@ -12,6 +11,7 @@
             "handle": {"x":5, "y":17},
             "barrel": {"x": 19, "y": 3},
             "bulletSpread": 0.069,
+            "bulletNum": 1,
             "automatic": true
 
         },
@@ -26,9 +26,10 @@
             "handle": {"x":10, "y":34},
             "barrel": {"x": 38, "y": 8},
             "bulletSpread": 0,
+            "bulletNum": 1,
             "automatic": false
         },
-        "AK_47":{
+        "woodAK":{
             "fireRate": 5,
             "fireSpeed" : 9,
             "dammage" : 3,
@@ -39,7 +40,134 @@
             "handle": {"x":16, "y":20},
             "barrel": {"x": 49, "y": 6},
             "bulletSpread": 0.17,
+            "bulletNum": 1,
             "automatic": true
+        },
+        "blackSidearm":{
+            "fireRate": 1,
+            "fireSpeed" : 6,
+            "dammage" : 6,
+            "bulletType": 1,
+            "capacity": 6,
+            "reloadTime": 25,
+            "totalCapacity": 200,
+            "handle": {"x":5, "y":16},
+            "barrel": {"x": 18, "y": 4},
+            "bulletSpread": 0.1,
+            "bulletNum": 1,
+            "automatic": false
+        },
+        "metalSidearm":{
+            "fireRate": 1,
+            "fireSpeed" : 8,
+            "dammage" : 10,
+            "bulletType": 1,
+            "capacity": 2,
+            "reloadTime": 20,
+            "totalCapacity": 100,
+            "handle": {"x":4, "y":16},
+            "barrel": {"x": 18, "y": 4},
+            "bulletSpread": 0.3,
+            "bulletNum": 1,
+            "automatic": false
+        },
+        "barrelMachineGun":{
+            "fireRate": 2,
+            "fireSpeed" : 10,
+            "dammage" : 2,
+            "bulletType": 1,
+            "capacity": 100,
+            "reloadTime": 120,
+            "totalCapacity": 800,
+            "handle": {"x":17, "y":19},
+            "barrel": {"x": 49, "y": 6},
+            "bulletSpread": 0.2,
+            "bulletNum": 1,
+            "automatic": true
+        },
+        "dEagle":{
+            "fireRate": 20,
+            "fireSpeed" : 10,
+            "dammage" : 15,
+            "bulletType": 1,
+            "capacity": 6,
+            "reloadTime": 30,
+            "totalCapacity": 100,
+            "handle": {"x":5, "y":16},
+            "barrel": {"x": 18, "y": 13},
+            "bulletSpread": 0.03,
+            "bulletNum": 1,
+            "automatic": false
+        },
+        "woodSidearm":{
+            "fireRate": 1,
+            "fireSpeed" : 5,
+            "dammage" : 8,
+            "bulletType": 1,
+            "capacity": 2,
+            "reloadTime": 15,
+            "totalCapacity": 150,
+            "handle": {"x":5, "y":19},
+            "barrel": {"x": 25, "y": 5},
+            "bulletSpread": 0.27,
+            "bulletNum": 1,
+            "automatic": false
+        },
+        "barrelWood":{
+            "fireRate": 4,
+            "fireSpeed" : 7,
+            "dammage" : 4,
+            "bulletType": 1,
+            "capacity": 40,
+            "reloadTime": 120,
+            "totalCapacity": 600,
+            "handle": {"x":17, "y":20},
+            "barrel": {"x": 48, "y": 5},
+            "bulletSpread": 0.17,
+            "bulletNum": 1,
+            "automatic": true
+        },
+        "blackSniper":{
+            "fireRate": 1,
+            "fireSpeed" : 15,
+            "dammage" : 40,
+            "bulletType": 1,
+            "capacity": 1,
+            "reloadTime": 60,
+            "totalCapacity": 50,
+            "handle": {"x":16, "y":28},
+            "barrel": {"x": 64, "y": 14},
+            "bulletSpread": 0,
+            "bulletNum": 1,
+            "automatic": false
+        },
+        "woodShotGun":{
+            "fireRate": 1,
+            "fireSpeed" : 5,
+            "dammage" : 3,
+            "bulletType": 1,
+            "capacity": 2,
+            "reloadTime": 30,
+            "totalCapacity": 50,
+            "handle": {"x":6, "y":12},
+            "barrel": {"x": 48, "y": 4},
+            "bulletSpread": 0.17,
+            "automatic": false,
+            "bulletNum": 5
+        },
+        "nailGun":{
+            "fireRate": 15,
+            "fireSpeed" : 10,
+            "dammage" : 6,
+            "bulletType": 4,
+            "capacity": 15,
+            "reloadTime": 40,
+            "totalCapacity": 200,
+            "handle": {"x":15, "y":24},
+            "barrel": {"x": 41, "y": 12},
+            "bulletSpread": 0.01,
+            "automatic": true,
+            "bulletNum": 1
         }
     }
 }

@@ -42,15 +42,15 @@
 },
 "blackSidearm.png":
 {
-	"frame": {"x":19,"y":0,"w":20,"h":17},
+	"frame": {"x":19,"y":0,"w":19,"h":17},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":17},
-	"sourceSize": {"w":20,"h":17}
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":17},
+	"sourceSize": {"w":19,"h":17}
 },
 "blackSMG.png":
 {
-	"frame": {"x":64,"y":114,"w":50,"h":32},
+	"frame": {"x":0,"y":140,"w":50,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":32},
@@ -58,7 +58,7 @@
 },
 "blackSniper.png":
 {
-	"frame": {"x":0,"y":114,"w":64,"h":29},
+	"frame": {"x":0,"y":111,"w":64,"h":29},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":29},
@@ -82,7 +82,7 @@
 },
 "metalSidearm.png":
 {
-	"frame": {"x":87,"y":0,"w":18,"h":17},
+	"frame": {"x":86,"y":0,"w":18,"h":17},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":17},
@@ -96,17 +96,9 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":41,"h":25},
 	"sourceSize": {"w":41,"h":25}
 },
-"shotGun.png":
-{
-	"frame": {"x":39,"y":0,"w":48,"h":17},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":17},
-	"sourceSize": {"w":48,"h":17}
-},
 "uzi.png":
 {
-	"frame": {"x":90,"y":85,"w":33,"h":29},
+	"frame": {"x":64,"y":111,"w":33,"h":29},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":29},
@@ -119,6 +111,14 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":25},
 	"sourceSize": {"w":50,"h":25}
+},
+"woodShotGun.png":
+{
+	"frame": {"x":38,"y":0,"w":48,"h":17},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":17},
+	"sourceSize": {"w":48,"h":17}
 },
 "woodSidearm.png":
 {
@@ -133,8 +133,8 @@
 	"version": "1.0",
 	"image": "guns.png",
 	"format": "RGBA8888",
-	"size": {"w":123,"h":146},
+	"size": {"w":106,"h":172},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:fd7064c2a92350229ed74ee15a3f52cd:84aeb5624b110c901002055f74676014:62c1f540b5fd80b9e41584087e1ed9b4$"
+	"smartupdate": "$TexturePacker:SmartUpdate:e9a7395fd91c3d23b686f122380f4a57:8f91942defaf82a3351614a88bc8da91:62c1f540b5fd80b9e41584087e1ed9b4$"
 }
 }

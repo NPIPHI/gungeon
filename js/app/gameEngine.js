@@ -19,6 +19,10 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             new enemys_1.bulletMan(300, 200, 1);
             new enemys_1.bulletMan(400, 200, 1);
             new enemys_1.bulletMan(500, 200, 1);
+            new enemys_1.bulletMan(600, 200, 1);
+            new enemys_1.bulletMan(700, 200, 1);
+            new enemys_1.bulletMan(800, 200, 1);
+            new enemys_1.bulletMan(900, 200, 1);
         }
         makePlayer(x, y) {
             exports.p1 = new player(x, y);
@@ -26,15 +30,24 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         cycle(deltaTime, time) {
             this.mouse.position.x = keyboard_1.default.mouseX - this.mouse.width / 2;
             this.mouse.position.y = keyboard_1.default.mouseY - this.mouse.width / 2;
-            gameObjects.forEach(element => {
+            exports.gameObjects.forEach(element => {
                 element.update(deltaTime * timeDilate);
             });
-            exports.currentRoom.update();
+            exports.currentRoom.update(deltaTime * timeDilate);
             exports.removeGameObjects.forEach(obj => {
-                gameObjects.splice(gameObjects.indexOf(obj), 1);
+                exports.gameObjects.splice(exports.gameObjects.indexOf(obj), 1);
             });
+            bufferBullets.forEach(obj => {
+                if (obj.enemy) {
+                    exports.enemyBullets.push(obj);
+                }
+                else {
+                    exports.playerBullets.push(obj);
+                }
+            });
+            bufferBullets = new Array();
             exports.bufferGameObjects.forEach(obj => {
-                gameObjects.push(obj);
+                exports.gameObjects.push(obj);
             });
             exports.bufferGameObjects = Array();
             exports.removeGameObjects = Array();
@@ -81,14 +94,14 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.reloadBar = new progressBar(x, y - 50, 40, 1);
             this.ammoCounter = new fractionCounter(screen.width - 50, screen.height - 50, 0, 0, true);
             this.guns.push(new gun(1));
-            this.guns.push(new gun(2));
+            this.guns.push(new gun(11));
             this.guns[0].switchGunIn(this.ammoCounter, this.reloadBar);
             this.currentGun = 0;
             this.hitbox = new shapes_1.rectangle(x, y, this.sprite.width, this.sprite.height);
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
-            this.keyboardManage();
+            this.calcMov();
             this.sprite.position.x += this.mov.x * deltaTime;
             this.sprite.position.y += this.mov.y * deltaTime;
             this.hitbox = this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
@@ -113,9 +126,21 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 this.currentGun %= this.guns.length;
                 this.guns[this.currentGun].switchGunIn(this.ammoCounter, this.reloadBar);
             }
+            for (let i = 49; i < 58; i++) {
+                if (keyboard_1.default.getToggle(i)) {
+                    this.guns[this.currentGun].switchGunOut();
+                    this.currentGun = Math.max(0, Math.min(this.guns.length - 1, i - 49));
+                    this.guns[this.currentGun].switchGunIn(this.ammoCounter, this.reloadBar);
+                }
+            }
+            if (keyboard_1.default.getToggle(48)) {
+                this.guns[this.currentGun].switchGunOut();
+                this.currentGun = this.guns.length - 1;
+                this.guns[this.currentGun].switchGunIn(this.ammoCounter, this.reloadBar);
+            }
             this.guns[this.currentGun].update(deltaTime);
         }
-        keyboardManage() {
+        calcMov() {
             if (keyboard_1.default.getKey(87)) {
                 this.mov.y -= 2;
             }
@@ -173,8 +198,10 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             super();
             this.isDestroyed = false;
             this.sprite = new PIXI.Sprite(this.getBulletType(typeIndex));
-            this.sprite.x = x;
-            this.sprite.y = y;
+            this.sprite.x = x - this.sprite.width / 2;
+            this.sprite.y = y - this.sprite.height / 2;
+            this.x = x;
+            this.y = y;
             this.hitbox = new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height);
             this.heading = heading;
             this.dammage = dammage;
@@ -182,36 +209,41 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.sprite.rotation = heading;
             this.type = typeIndex;
             this.enemy = enemy;
-            if (enemy) {
-                exports.enemyBullets.push(this);
-            }
-            else {
-                exports.playerBullets.push(this);
-            }
+            this.sprite.anchor.x = 0.5;
+            this.sprite.anchor.y = 0.5;
+            bufferBullets.push(this);
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
-            this.sprite.x += this.speed * Math.cos(this.heading) * deltaTime;
-            this.sprite.y += this.speed * Math.sin(this.heading) * deltaTime;
-            this.hitbox = this.hitbox.translateAbsolute(this.sprite.x, this.sprite.y);
+            this.x += this.speed * Math.cos(this.heading) * deltaTime;
+            this.y += this.speed * Math.sin(this.heading) * deltaTime;
+            this.sprite.x = this.x + this.sprite.width / 2;
+            this.sprite.y = this.y + this.sprite.height / 2;
+            this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
             walls.forEach(r => {
                 if (this.hitbox.intersects(r)) {
+                    this.sprite.texture = PIXI.Texture.WHITE;
                     this.destroy();
                 }
             });
         }
         destroy() {
             if (!this.isDestroyed) {
-                super.destroy();
-                animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y, this.type, this.heading);
-                this.isDestroyed = true;
-                exports.foreGroundImage.removeChild(this.sprite);
-                if (this.enemy) {
-                    exports.enemyBullets.splice(exports.enemyBullets.indexOf(this), 1);
+                try {
+                    super.destroy();
+                    animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y, this.type, this.heading);
+                    this.isDestroyed = true;
+                    exports.foreGroundImage.removeChild(this.sprite);
+                    if (this.enemy) {
+                        exports.enemyBullets.splice(exports.enemyBullets.indexOf(this), 1);
+                    }
+                    else {
+                        exports.playerBullets.splice(exports.playerBullets.indexOf(this), 1);
+                        ;
+                    }
                 }
-                else {
-                    exports.playerBullets.splice(exports.playerBullets.indexOf(this), 1);
-                    ;
+                catch (e) {
+                    console.log(e);
                 }
             }
         }
@@ -224,8 +256,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 case 3:
                     return PIXI.loader.resources["res/bullets.json"].textures["smallRed.png"];
                 case 4:
-                    return PIXI.Texture.WHITE;
+                    return PIXI.loader.resources["res/bullets.json"].textures["nail.png"];
             }
+            return PIXI.Texture.WHITE;
         }
     }
     class explosion extends bullet {
@@ -253,19 +286,58 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.reloading = false;
             this.reloadProg = 0;
             this.shotCooldown = 0;
-            this.getTypePropeties(type);
-            exports.foreGroundImage.addChild(this.sprite);
+            if (type != 0) {
+                this.getTypePropeties(type);
+                exports.foreGroundImage.addChild(this.sprite);
+            }
         }
         getTypePropeties(type) {
             let gun;
             switch (type) {
                 case 1:
-                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.pistol;
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackPistol;
                     this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackPistol.png"]);
                     break;
                 case 2:
-                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.AK_47;
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodAK;
                     this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["woodAK.png"]);
+                    break;
+                case 3:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.metalSidearm;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["metalSidearm.png"]);
+                    break;
+                case 4:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackSidearm;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSidearm.png"]);
+                    break;
+                case 5:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.barrelMachineGun;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["barrelMachineGun.png"]);
+                    break;
+                case 6:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.dEagle;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["dEagle.png"]);
+                    break;
+                case 7:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodSidearm;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["woodSidearm.png"]);
+                    break;
+                case 8:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.barrelWood;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["barrelWood.png"]);
+                    break;
+                case 9:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackSniper;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSniper.png"]);
+                    break;
+                case 10:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodShotGun;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["woodShotGun.png"]);
+                    break;
+                case 11:
+                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.nailGun;
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["nailGun.png"]);
+                    break;
             }
             this.sprite.pivot = new PIXI.Point(gun.handle.x, gun.handle.y);
             this.fireRate = gun.fireRate;
@@ -280,6 +352,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.automatic = gun.automatic;
             this.isActive = false;
             this.bulletSpread = gun.bulletSpread;
+            this.bulletNum = gun.bulletNum;
             this.barrelAngle = Math.atan2(gun.barrel.y - gun.handle.y, gun.barrel.x - gun.handle.x);
             this.barrelDist = shapes_1.rectangle.getDistance(new PIXI.Point(gun.handle.x, gun.handle.y), new PIXI.Point(gun.barrel.x, gun.barrel.y));
             this.barrel = new PIXI.Point(gun.barrel.x, gun.barrel.y);
@@ -327,7 +400,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 if (this.currentLoad > 0) {
                     if (this.shotCooldown <= 0) {
                         let angle = shapes_1.rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
-                        new bullet(this.getBarrelPoistion().x, this.getBarrelPoistion().y, angle + (Math.random() - 0.5) * this.bulletSpread, this.bulletType, this.fireSpeed, this.dammage, false);
+                        for (let i = 0; i < this.bulletNum; i++) {
+                            new bullet(this.getBarrelPoistion().x, this.getBarrelPoistion().y, angle + (Math.random() - 0.5) * this.bulletSpread, this.bulletType, this.fireSpeed, this.dammage, false);
+                        }
                         this.shotCooldown = this.fireRate;
                         this.currentLoad--;
                         this.currentRounds--;
@@ -402,7 +477,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
     }
     class floorObject {
-        constructor(x, y, type, dx, dy, owner) {
+        constructor(x, y, type, dx, dy, rotation, spin, owner) {
             this.getTypeProperties(type);
             this.sprite.position.x = x;
             this.sprite.position.y = y;
@@ -410,15 +485,27 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.dx = dx;
             this.owner = owner;
             this.type = type;
+            this.sprite.rotation = rotation;
+            this.spin = spin;
+            this.sprite.anchor.x = 0.5;
+            this.sprite.anchor.y = 0.5;
             exports.midGroundImage.addChild(this.sprite);
             owner.floorObjects.push(this);
         }
-        update() {
-            if (Math.abs(this.dx) > 0.5 || Math.abs(this.dy) > 0.5) {
-                this.dx *= 0.90;
-                this.dy *= 0.90;
-                this.sprite.position.x += this.dx;
-                this.sprite.position.y += this.dy;
+        update(deltaTime) {
+            if (Math.abs(this.dx) > 0.5 || Math.abs(this.dy) > 0.5 || Math.abs(this.spin) > 0.5) {
+                this.spin *= Math.pow(0.9, deltaTime);
+                this.dx *= Math.pow(0.9, deltaTime);
+                this.dy *= Math.pow(0.9, deltaTime);
+                walls.forEach(e => {
+                    if (e.intersects(new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height))) {
+                        this.dx *= -1.1;
+                        this.dy *= -1.1;
+                    }
+                });
+                this.sprite.rotation += this.spin * deltaTime;
+                this.sprite.position.x += this.dx * deltaTime;
+                this.sprite.position.y += this.dy * deltaTime;
             }
         }
         getTypeProperties(type) {
@@ -426,11 +513,14 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 case 1:
                     this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManDead.png"]);
                     break;
+                case 2:
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSidearm.png"]);
+                    break;
             }
         }
         compress() {
             exports.midGroundImage.removeChild(this.sprite);
-            this.owner.addCompressed(this.sprite.position.x, this.sprite.position.y, this.type);
+            this.owner.addCompressed(this.sprite.position.x, this.sprite.position.y, this.type, this.sprite.rotation);
             this.owner.floorObjects.splice(this.owner.floorObjects.indexOf(this), 1);
         }
     }
@@ -438,9 +528,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         constructor(shape) {
             this.floorObjects = Array();
         }
-        update() {
+        update(deltaTime) {
             this.floorObjects.forEach(element => {
-                element.update();
+                element.update(deltaTime);
             });
         }
         exit() {
@@ -454,14 +544,17 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
         uncompress() {
             this.compressed.forEach(element => {
-                new floorObject(element.x, element.y, element.type, 0, 0, this);
+                new floorObject(element.x, element.y, element.type, 0, 0, element.rotation, 0, this);
             });
         }
-        addCompressed(x, y, type) {
-            this.compressed.push({ x, y, type });
+        addCompressed(x, y, type, rotation) {
+            this.compressed.push({ x, y, type, rotation });
         }
         addFloorObject(x, y, type, dx, dy) {
-            new floorObject(x, y, type, dx, dy, this);
+            new floorObject(x, y, type, dx, dy, 0, 0, this);
+        }
+        addFloorObjectAdv(x, y, type, dx, dy, rotation, spin) {
+            new floorObject(x, y, type, dx, dy, rotation, spin, this);
         }
     }
     class wall {
@@ -557,8 +650,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.time += timeDelta;
             this.animations.forEach(anim => {
                 anim.sprite.texture = anim.img[Math.max(Math.min(Math.floor(this.time - anim.startTime), anim.img.length - 1), 0)];
-                anim.sprite.x = anim.x - anim.sprite.width / 2;
-                anim.sprite.y = anim.y - anim.sprite.height / 2;
             });
         }
     }
@@ -568,11 +659,11 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.startTime = time;
             this.getAnimFrames(type);
             this.sprite = new PIXI.Sprite(this.img[0]);
-            this.sprite.position.x = x - this.sprite.width / 2;
-            this.sprite.position.y = y - this.sprite.width / 2;
-            this.x = x;
-            this.y = y;
             this.sprite.rotation = angle;
+            this.sprite.position.x = x;
+            this.sprite.position.y = y;
+            this.sprite.anchor.x = 0.5;
+            this.sprite.anchor.y = 0.5;
             this.frames -= 0.01;
             this.angle = angle;
             exports.foreGroundImage.addChild(this.sprite);
@@ -606,6 +697,15 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp1.png"]);
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp2.png"]);
                     this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp3.png"]);
+                    break;
+                case 4:
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp1.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp2.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp3.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp4.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp5.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp6.png"]);
+                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp7.png"]);
                     break;
             }
             this.frames = this.img.length;
@@ -799,10 +899,11 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
     }
     let pixiApp;
-    let gameObjects = new Array();
+    exports.gameObjects = new Array();
     exports.bufferGameObjects = new Array();
     exports.removeGameObjects = new Array();
     let timeDilate;
+    let bufferBullets = new Array();
     exports.playerBullets = new Array();
     exports.enemyBullets = new Array();
     exports.backGroundImage = new PIXI.particles.ParticleContainer();

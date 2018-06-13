@@ -9,8 +9,10 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
             this.state = 0;
             this.legState = 0;
             this.animImgs = Array();
+            this.target = new PIXI.Point(0, 0);
         }
         update(deltaTime) {
+            this.target = gameEngine_1.p1.hitbox.getCenter();
             this.time += deltaTime;
             switch (this.state) {
                 case 0:
@@ -106,13 +108,19 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
             this.time = 0;
             this.getTypeProperties(enemyType);
             gameEngine_1.foreGroundImage.addChild(this.body);
+            gameEngine_1.foreGroundImage.addChild(this.gun);
             this.body.addChild(this.legs);
         }
+        update(deltaTime) {
+            super.update(deltaTime);
+            this.calcGunPosition();
+        }
         getTypeProperties(type) {
+            let gunData;
             switch (type) {
                 case 1:
                     this.AI = 1;
-                    this.hp = 200;
+                    this.hp = 20;
                     this.speed = 3;
                     this.friction = 0.3;
                     this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
@@ -124,20 +132,67 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
                     this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
                     this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs1.png"]);
                     this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs2.png"]);
+                    this.gun = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackPistol.png"]);
+                    gunData = PIXI.loader.resources["res/gunData.json"].data.guns.blackPistol;
                     break;
             }
+            this.gun.pivot = new PIXI.Point(gunData.handle.x, gunData.handle.y);
+            this.barrelAngle = Math.atan2(gunData.barrel.y - gunData.handle.y, gunData.barrel.x - gunData.handle.x);
+            this.barrelDist = shapes_1.rectangle.getDistance(new PIXI.Point(gunData.handle.x, gunData.handle.y), new PIXI.Point(gunData.barrel.x, gunData.barrel.y));
+            this.barrel = new PIXI.Point(gunData.barrel.x, gunData.barrel.y);
             this.body.position.x = this.x;
             this.body.position.y = this.y;
             this.legs.position.y = this.body.height;
             this.hitbox = new shapes_1.rectangle(this.x, this.y, this.body.width, this.body.height + this.legs.height);
         }
         shoot() {
-            gameEngine_1.gameEngine.makeBullet(this.hitbox.getCenter().x, this.hitbox.getCenter().y, shapes_1.rectangle.getAngle(this.hitbox.getCenter(), gameEngine_1.p1.hitbox.getCenter()), 3, 4, 1, true);
+            let posit = this.getBarrelPoistion();
+            gameEngine_1.gameEngine.makeBullet(posit.x, posit.y, shapes_1.rectangle.getAngle(posit, this.target), 3, 4, 1, true);
+        }
+        calcGunPosition() {
+            if (this.hitbox.getCenter().x < gameEngine_1.p1.hitbox.x) {
+                if (this.hitbox.getCenter().y < this.target.y) {
+                    this.gun.scale.x = 1;
+                    this.gun.x = this.hitbox.x + this.hitbox.width;
+                    this.gun.y = this.hitbox.getCenter().y;
+                    this.gun.rotation = shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
+                }
+                else {
+                    this.gun.scale.x = -1;
+                    this.gun.x = this.hitbox.x + this.hitbox.width;
+                    this.gun.y = this.hitbox.getCenter().y;
+                    this.gun.rotation = Math.PI + shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
+                }
+            }
+            else {
+                if (this.hitbox.getCenter().y < this.target.y) {
+                    this.gun.scale.x = -1;
+                    this.gun.x = this.hitbox.x;
+                    this.gun.y = this.hitbox.getCenter().y;
+                    this.gun.rotation = Math.PI + shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
+                }
+                else {
+                    this.gun.scale.x = 1;
+                    this.gun.x = this.hitbox.x;
+                    this.gun.y = this.hitbox.getCenter().y;
+                    this.gun.rotation = shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
+                }
+            }
+        }
+        getBarrelPoistion() {
+            if (this.gun.scale.x == 1) {
+                return new PIXI.Point(this.gun.x + Math.cos(this.barrelAngle + this.gun.rotation) * this.barrelDist, this.gun.y + Math.sin(this.barrelAngle + this.gun.rotation) * this.barrelDist);
+            }
+            else {
+                return new PIXI.Point(2 * (this.gun.x + Math.cos(this.gun.rotation - Math.PI / 2) * (this.gun.pivot.y - this.barrel.y)) - (this.gun.x + Math.cos(this.barrelAngle + this.gun.rotation) * this.barrelDist), 2 * (this.gun.y + Math.sin(this.gun.rotation - Math.PI / 2) * (this.gun.pivot.y - this.barrel.y)) - (this.gun.y + Math.sin(this.barrelAngle + this.gun.rotation) * this.barrelDist));
+            }
         }
         destroy() {
             super.destroy();
             gameEngine_1.foreGroundImage.removeChild(this.body);
-            gameEngine_1.currentRoom.addFloorObject(this.body.position.x, this.body.position.y, 1, this.dx, -this.dy);
+            gameEngine_1.foreGroundImage.removeChild(this.gun);
+            gameEngine_1.currentRoom.addFloorObject(this.hitbox.getCenter().x, this.hitbox.getCenter().y, 1, this.dx, -this.dy);
+            gameEngine_1.currentRoom.addFloorObjectAdv(this.body.position.x + this.hitbox.width, this.body.position.y + 10, 2, this.dx * 2, -this.dy * 1.5, this.gun.rotation, 0.5);
         }
         incrememtLegs() {
             this.legState++;

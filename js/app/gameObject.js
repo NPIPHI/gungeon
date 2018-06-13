@@ -3,12 +3,16 @@ define(["require", "exports", "./gameEngine"], function (require, exports, gameE
     Object.defineProperty(exports, "__esModule", { value: true });
     class gameObject {
         constructor() {
+            this.rem = false;
             gameEngine_1.bufferGameObjects.push(this);
         }
         update(deltaTime) {
         }
         destroy() {
-            gameEngine_1.removeGameObjects.push(this);
+            if (!this.rem) {
+                gameEngine_1.removeGameObjects.push(this);
+                this.rem = true;
+            }
         }
     }
     exports.default = gameObject;

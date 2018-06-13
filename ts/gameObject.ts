@@ -1,7 +1,8 @@
-import {bufferGameObjects, removeGameObjects} from "./gameEngine";
+import {bufferGameObjects, removeGameObjects, gameObjects} from "./gameEngine";
 
 
 export default abstract class gameObject{
+    rem: boolean  = false;
     constructor(){
         bufferGameObjects.push(this);
     }
@@ -9,7 +10,10 @@ export default abstract class gameObject{
 
     }
     destroy(){
-        removeGameObjects.push(this);
+        if(!this.rem){
+            removeGameObjects.push(this);
+            this.rem = true;
+        }
     }
     sprite: PIXI.Sprite;
 }
