@@ -15,14 +15,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.generateFloor();
             exports.currentRoom = new room(new shapes_1.rectangle(0, 0, 0, 0));
             this.makePlayer(100, 100);
-            new enemys_1.bulletMan(200, 200, 1);
-            new enemys_1.bulletMan(300, 200, 1);
-            new enemys_1.bulletMan(400, 200, 1);
-            new enemys_1.bulletMan(500, 200, 1);
-            new enemys_1.bulletMan(600, 200, 1);
-            new enemys_1.bulletMan(700, 200, 1);
-            new enemys_1.bulletMan(800, 200, 1);
-            new enemys_1.bulletMan(900, 200, 1);
+            new enemys_1.potato(500, 500);
         }
         makePlayer(x, y) {
             exports.p1 = new player(x, y);
@@ -77,8 +70,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             new wall(0, 1030, 1920, 50);
             new wall(1870, 0, 50, 1080);
         }
-        static makeBullet(x, y, heading, typeIndex, speed, dammage, enemy) {
-            new bullet(x, y, heading, typeIndex, speed, dammage, enemy);
+        static makeBullet(x, y, heading, backdate, typeIndex, speed, dammage, enemy) {
+            new bullet(x, y, heading, backdate, typeIndex, speed, dammage, enemy);
         }
     }
     exports.gameEngine = gameEngine;
@@ -94,10 +87,11 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.reloadBar = new progressBar(x, y - 50, 40, 1);
             this.ammoCounter = new fractionCounter(screen.width - 50, screen.height - 50, 0, 0, true);
             this.guns.push(new gun(1));
-            this.guns.push(new gun(11));
+            this.guns.push(new gun(5));
             this.guns[0].switchGunIn(this.ammoCounter, this.reloadBar);
             this.currentGun = 0;
             this.hitbox = new shapes_1.rectangle(x, y, this.sprite.width, this.sprite.height);
+            this.healthBar = new bigHealthBar(50, 900, 1800, 5);
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
@@ -194,7 +188,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
     }
     class bullet extends gameObject_1.default {
-        constructor(x, y, heading, typeIndex, speed, dammage, enemy) {
+        constructor(x, y, heading, backDate, typeIndex, speed, dammage, enemy) {
             super();
             this.isDestroyed = false;
             this.sprite = new PIXI.Sprite(this.getBulletType(typeIndex));
@@ -212,6 +206,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.sprite.anchor.x = 0.5;
             this.sprite.anchor.y = 0.5;
             bufferBullets.push(this);
+            this.update(backDate);
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
@@ -263,7 +258,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
     }
     class explosion extends bullet {
         constructor(x, y, radius, type, dammage) {
-            super(x, y, 0, type, 0, dammage, true);
+            super(x, y, 0, type, 0, 0, dammage, true);
             this.framePassed = false;
             exports.playerBullets.push(this);
         }
@@ -363,13 +358,13 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     this.sprite.scale.x = 1;
                     this.sprite.x = exports.p1.hitbox.x + exports.p1.hitbox.width;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
-                    this.sprite.rotation = shapes_1.rectangle.getAngle(this.sprite.getGlobalPosition(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                    this.sprite.rotation = shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
                 else {
                     this.sprite.scale.x = -1;
                     this.sprite.x = exports.p1.hitbox.x + exports.p1.hitbox.width;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
-                    this.sprite.rotation = Math.PI + shapes_1.rectangle.getAngle(this.sprite.getGlobalPosition(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                    this.sprite.rotation = Math.PI + shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
             }
             else {
@@ -377,13 +372,13 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     this.sprite.scale.x = -1;
                     this.sprite.x = exports.p1.hitbox.x;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
-                    this.sprite.rotation = Math.PI + shapes_1.rectangle.getAngle(this.sprite.getGlobalPosition(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                    this.sprite.rotation = Math.PI + shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
                 else {
                     this.sprite.scale.x = 1;
                     this.sprite.x = exports.p1.hitbox.x;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
-                    this.sprite.rotation = shapes_1.rectangle.getAngle(this.sprite.getGlobalPosition(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                    this.sprite.rotation = shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
             }
         }
@@ -398,12 +393,12 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         shoot() {
             if (!this.reloading) {
                 if (this.currentLoad > 0) {
-                    if (this.shotCooldown <= 0) {
-                        let angle = shapes_1.rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                    let angle = shapes_1.rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+                    while (0 >= this.shotCooldown && this.currentLoad > 0) {
                         for (let i = 0; i < this.bulletNum; i++) {
-                            new bullet(this.getBarrelPoistion().x, this.getBarrelPoistion().y, angle + (Math.random() - 0.5) * this.bulletSpread, this.bulletType, this.fireSpeed, this.dammage, false);
+                            new bullet(this.getBarrelPoistion().x, this.getBarrelPoistion().y, this.getShotAngle(), this.shotCooldown, this.bulletType, this.fireSpeed, this.dammage, false);
                         }
-                        this.shotCooldown = this.fireRate;
+                        this.shotCooldown += this.fireRate;
                         this.currentLoad--;
                         this.currentRounds--;
                         exports.p1.ammoCounter.setValue(this.currentLoad, this.currentRounds);
@@ -416,6 +411,10 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     this.reload();
                 }
             }
+        }
+        getShotAngle() {
+            let idealAngle = shapes_1.rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
+            return (Math.random() - 0.5) * this.bulletSpread + Math.min(Math.max(this.sprite.rotation - Math.PI / 2 + (Math.PI / 2) * this.sprite.scale.x - 0.1, idealAngle), this.sprite.rotation - Math.PI / 2 + (Math.PI / 2) * this.sprite.scale.x + 0.1);
         }
         switchGunOut() {
             this.reloading = false;
@@ -440,6 +439,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 if (this.reloadProg >= this.reloadTime) {
                     this.finishReload();
                 }
+            }
+            if (this.shotCooldown < 0) {
+                this.shotCooldown = 0;
             }
             if (this.shotCooldown > 0) {
                 this.shotCooldown -= deltaTime;
@@ -515,6 +517,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     break;
                 case 2:
                     this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSidearm.png"]);
+                    break;
+                case 3:
+                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["potatoBossDead.png"]);
                     break;
             }
         }
@@ -895,6 +900,74 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         show() {
             this.line.visible = true;
             this.pointer.visible = true;
+            this.visible = true;
+        }
+    }
+    class bigHealthBar extends UIObject {
+        constructor(x, y, length, limit) {
+            super();
+            this.allImages = new PIXI.Container();
+            if (length < 12) {
+                throw "tooSmall";
+            }
+            this.fill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFill.png"]);
+            this.Lcap = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarLeft.png"]);
+            this.Rcap = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarRight.png"]);
+            this.fillBorder = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarCenter.png"]);
+            this.LFill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFillEnd.png"]);
+            this.RFill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFillEnd.png"]);
+            this.x = x;
+            this.y = y;
+            this.limit = limit;
+            this.length = length;
+            this.Lcap.x = this.x;
+            this.Lcap.y = this.y;
+            this.Rcap.y = this.y;
+            this.Rcap.x = this.x + this.length - 6;
+            this.fillBorder.width = this.length - 12;
+            this.fillBorder.x = this.x + 6;
+            this.fillBorder.y = this.y + 2;
+            this.fill.x = this.x + 6;
+            this.fill.y = this.y + 2;
+            this.fill.width = this.length - 12;
+            this.LFill.y = this.y + 2;
+            this.LFill.x = this.x + 2;
+            this.LFill.width = 4;
+            this.RFill.y = this.y + 2;
+            this.RFill.x = this.x + this.length - 6;
+            this.RFill.width = 4;
+            this.pos = 0;
+            this.visible = true;
+            this.setPointer(0);
+            this.allImages.addChild(this.fill);
+            this.allImages.addChild(this.Lcap);
+            this.allImages.addChild(this.Rcap);
+            this.allImages.addChild(this.fillBorder);
+            this.allImages.addChild(this.LFill);
+            this.allImages.addChild(this.RFill);
+            UIImage.addChild(this.allImages);
+        }
+        setPointer(position) {
+            this.pos = position;
+        }
+        setPosition(x, y) {
+            this.allImages.x += x - this.x;
+            this.allImages.y += y - this.y;
+            this.x = x;
+            this.y = y;
+        }
+        getBounds() {
+            return new shapes_1.rectangle(this.x, this.y, this.length, 20);
+        }
+        remove() {
+            UIImage.removeChild(this.allImages);
+        }
+        hide() {
+            this.allImages.visible = false;
+            this.visible = false;
+        }
+        show() {
+            this.allImages.visible = true;
             this.visible = true;
         }
     }

@@ -80,9 +80,49 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
 	"sourceSize": {"w":15,"h":15}
 },
+"bigHealthBarCenter.png":
+{
+	"frame": {"x":141,"y":0,"w":1,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":20},
+	"sourceSize": {"w":1,"h":20}
+},
+"bigHealthBarFill.png":
+{
+	"frame": {"x":142,"y":0,"w":1,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":16},
+	"sourceSize": {"w":1,"h":16}
+},
+"bigHealthBarFillEnd.png":
+{
+	"frame": {"x":143,"y":0,"w":1,"h":14},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":14},
+	"sourceSize": {"w":1,"h":14}
+},
+"bigHealthBarLeft.png":
+{
+	"frame": {"x":144,"y":0,"w":6,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":20},
+	"sourceSize": {"w":6,"h":20}
+},
+"bigHealthBarRight.png":
+{
+	"frame": {"x":150,"y":0,"w":6,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":20},
+	"sourceSize": {"w":6,"h":20}
+},
 "cursor1.png":
 {
-	"frame": {"x":141,"y":0,"w":15,"h":15},
+	"frame": {"x":156,"y":0,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -90,7 +130,7 @@
 },
 "pointer.png":
 {
-	"frame": {"x":156,"y":0,"w":9,"h":12},
+	"frame": {"x":171,"y":0,"w":9,"h":12},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":12},
@@ -98,7 +138,7 @@
 },
 "whiteLine.png":
 {
-	"frame": {"x":0,"y":15,"w":100,"h":3},
+	"frame": {"x":0,"y":20,"w":100,"h":3},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":3},
@@ -109,8 +149,8 @@
 	"version": "1.0",
 	"image": "UIElements.png",
 	"format": "RGBA8888",
-	"size": {"w":165,"h":18},
+	"size": {"w":180,"h":23},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:94dcd38e6383152411119665e5a214a5:c49878c56c273ee6ccc0e1117229c63f:341576581b5d6dad21b5015694e81212$"
+	"smartupdate": "$TexturePacker:SmartUpdate:bcbcfea99e82e281f776a36397aef341:129ddccf1406433329f3c46d90e51bc1:341576581b5d6dad21b5015694e81212$"
 }
 }

@@ -72,13 +72,13 @@
             "automatic": false
         },
         "barrelMachineGun":{
-            "fireRate": 2,
+            "fireRate": 0.25,
             "fireSpeed" : 10,
-            "dammage" : 2,
+            "dammage" : 0.3,
             "bulletType": 1,
-            "capacity": 100,
+            "capacity": 500,
             "reloadTime": 120,
-            "totalCapacity": 800,
+            "totalCapacity": 3000,
             "handle": {"x":17, "y":19},
             "barrel": {"x": 49, "y": 6},
             "bulletSpread": 0.2,
@@ -157,6 +157,20 @@
         },
         "nailGun":{
             "fireRate": 15,
+            "fireSpeed" : 10,
+            "dammage" : 6,
+            "bulletType": 4,
+            "capacity": 15,
+            "reloadTime": 40,
+            "totalCapacity": 200,
+            "handle": {"x":15, "y":24},
+            "barrel": {"x": 41, "y": 12},
+            "bulletSpread": 0.01,
+            "automatic": true,
+            "bulletNum": 1
+        },
+        "waterGun":{
+            "fireRate": 0.1,
             "fireSpeed" : 10,
             "dammage" : 6,
             "bulletType": 4,

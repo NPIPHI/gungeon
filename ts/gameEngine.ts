@@ -2,7 +2,7 @@
 import {rectangle,shape} from "./shapes";
 import keyboard from "./keyboard";
 import gameObject from "./gameObject";
-import {bulletMan} from "./enemys";
+import {bulletMan, potato} from "./enemys";
 //import rectangle from "./rectangle";
 export class gameEngine{
     mouse: PIXI.Sprite;
@@ -19,14 +19,7 @@ export class gameEngine{
             this.generateFloor();           
             currentRoom = new room(new rectangle(0,0,0,0));
             this.makePlayer(100,100);
-            new bulletMan(200,200,1);
-            new bulletMan(300,200,1);
-            new bulletMan(400,200,1);
-            new bulletMan(500,200,1);
-            new bulletMan(600,200,1);
-            new bulletMan(700,200,1);
-            new bulletMan(800,200,1);
-            new bulletMan(900,200,1);
+            new potato(500,500);
     }
     makePlayer(x:number, y:number):void{
         p1 = new player(x,y);
@@ -80,8 +73,8 @@ export class gameEngine{
         new wall(0,1030,1920,50);
         new wall(1870,0,50,1080);
     }
-    static makeBullet(x: number, y: number, heading: number, typeIndex: number, speed: number, dammage: number, enemy: boolean){
-        new bullet(x, y, heading, typeIndex, speed, dammage, enemy);
+    static makeBullet(x: number, y: number, heading: number, backdate: number, typeIndex: number, speed: number, dammage: number, enemy: boolean){
+        new bullet(x, y, heading, backdate, typeIndex, speed, dammage, enemy);
     }
 };
 
@@ -94,6 +87,7 @@ class player extends gameObject{
     reloadBar: progressBar;
     ammoCounter: fractionCounter;
     mask: PIXI.Sprite;
+    healthBar: bigHealthBar;
     constructor(x: number, y: number){
         super();
         this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage("res/playerSmile.png"));
@@ -101,10 +95,11 @@ class player extends gameObject{
         this.reloadBar = new progressBar(x,y-50,40,1);
         this.ammoCounter = new fractionCounter(screen.width-50,screen.height-50, 0,0,true);
         this.guns.push(new gun(1));
-        this.guns.push(new gun(11));
+        this.guns.push(new gun(5));
         this.guns[0].switchGunIn(this.ammoCounter,this.reloadBar);
         this.currentGun = 0;
         this.hitbox = new rectangle(x,y,this.sprite.width,this.sprite.height);
+        this.healthBar = new bigHealthBar(50,900,1800,5);
         foreGroundImage.addChild(this.sprite);
     }
     update(deltaTime: number){
@@ -212,7 +207,7 @@ class bullet extends gameObject{
     enemy: boolean; 
     x: number;
     y: number;
-    constructor(x: number, y: number, heading: number, typeIndex: number, speed: number, dammage: number, enemy: boolean){
+    constructor(x: number, y: number, heading: number, backDate: number, typeIndex: number, speed: number, dammage: number, enemy: boolean){//positive backdate means future date, negetave backdate means backdateing;
         super();
         this.sprite = new PIXI.Sprite(this.getBulletType(typeIndex));
         this.sprite.x = x-this.sprite.width/2;
@@ -229,6 +224,7 @@ class bullet extends gameObject{
         this.sprite.anchor.x=0.5;
         this.sprite.anchor.y=0.5;
         bufferBullets.push(this);
+        this.update(backDate);
         foreGroundImage.addChild(this.sprite);
     }
     update(deltaTime: number){
@@ -280,7 +276,7 @@ class bullet extends gameObject{
 class explosion extends bullet{
     framePassed: boolean = false;
     constructor(x: number, y: number,radius: number,type: number, dammage: number){
-        super(x,y,0,type,0,dammage, true);
+        super(x,y,0,type,0,0,dammage, true);
         playerBullets.push(this);
     }    
     update(){
@@ -399,24 +395,24 @@ class gun{
                 this.sprite.scale.x=1;
                 this.sprite.x = p1.hitbox.x+p1.hitbox.width;
                 this.sprite.y = p1.hitbox.getCenter().y;
-                this.sprite.rotation = rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                this.sprite.rotation = rectangle.getAngle(new PIXI.Point(this.sprite.x,this.sprite.y),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
             } else {
                 this.sprite.scale.x=-1;
                 this.sprite.x = p1.hitbox.x+p1.hitbox.width;
                 this.sprite.y = p1.hitbox.getCenter().y;
-                this.sprite.rotation = Math.PI+rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                this.sprite.rotation = Math.PI+rectangle.getAngle(new PIXI.Point(this.sprite.x,this.sprite.y),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
             }
         } else{//left
             if(p1.hitbox.getCenter().y<keyboard.mouseY){
                 this.sprite.scale.x = -1;
                 this.sprite.x = p1.hitbox.x;
                 this.sprite.y = p1.hitbox.getCenter().y;
-                this.sprite.rotation = Math.PI+rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                this.sprite.rotation = Math.PI+rectangle.getAngle(new PIXI.Point(this.sprite.x,this.sprite.y),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
             } else {
                 this.sprite.scale.x=1;
                 this.sprite.x = p1.hitbox.x;
                 this.sprite.y = p1.hitbox.getCenter().y;
-                this.sprite.rotation = rectangle.getAngle(this.sprite.getGlobalPosition(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                this.sprite.rotation = rectangle.getAngle(new PIXI.Point(this.sprite.x,this.sprite.y),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
             }
         }
     }
@@ -430,12 +426,12 @@ class gun{
     shoot(){
         if(!this.reloading){
             if(this.currentLoad>0){
-                if(this.shotCooldown<=0){
-                    let angle = rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                let angle = rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+                while(0>= this.shotCooldown&&this.currentLoad>0){
                     for(let i = 0; i < this.bulletNum; i ++){
-                        new bullet(this.getBarrelPoistion().x,this.getBarrelPoistion().y, angle+(Math.random()-0.5)*this.bulletSpread, this.bulletType,this.fireSpeed,this.dammage, false);
+                        new bullet(this.getBarrelPoistion().x,this.getBarrelPoistion().y,this.getShotAngle(), this.shotCooldown, this.bulletType,this.fireSpeed,this.dammage, false);
                     }
-                    this.shotCooldown = this.fireRate;
+                    this.shotCooldown += this.fireRate;
                     this.currentLoad--;
                     this.currentRounds--;
                     p1.ammoCounter.setValue(this.currentLoad,this.currentRounds);
@@ -447,6 +443,10 @@ class gun{
                 this.reload();
             }
         }
+    }
+    getShotAngle():number{
+        let idealAngle = rectangle.getAngle(this.getBarrelPoistion(),new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
+        return (Math.random()-0.5)*this.bulletSpread+Math.min(Math.max(this.sprite.rotation-Math.PI/2+(Math.PI/2)*this.sprite.scale.x-0.1,idealAngle),this.sprite.rotation-Math.PI/2+(Math.PI/2)*this.sprite.scale.x+0.1);
     }
     switchGunOut() {
         this.reloading = false;
@@ -471,6 +471,9 @@ class gun{
             if(this.reloadProg>=this.reloadTime){
                 this.finishReload();
             }
+        }
+        if(this.shotCooldown<0){
+            this.shotCooldown=0;
         }
         if(this.shotCooldown>0){
             this.shotCooldown-=deltaTime;
@@ -553,6 +556,9 @@ class floorObject{
                 break;
             case 2:
                 this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSidearm.png"]);
+                break;
+            case 3:
+                this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["potatoBossDead.png"]);
                 break;
         }
     }
@@ -971,6 +977,87 @@ class progressBar extends UIObject{
     show(){
         this.line.visible = true;
         this.pointer.visible = true;
+        this.visible = true;
+    }
+}
+
+class bigHealthBar extends UIObject{
+    x: number;
+    y: number;
+    fill: PIXI.Sprite;
+    Lcap: PIXI.Sprite;
+    Rcap: PIXI.Sprite;
+    LFill: PIXI.Sprite;
+    RFill: PIXI.Sprite;
+    fillBorder: PIXI.Sprite;
+    allImages: PIXI.Container = new PIXI.Container();
+    limit: number;
+    length: number;
+    pos: number; //between 0 and limit
+    constructor(x: number, y: number, length: number, limit: number){
+        super();
+        if(length<12){
+            throw "tooSmall";//length must be larger than 12
+        }
+        this.fill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFill.png"]);
+        this.Lcap = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarLeft.png"]);
+        this.Rcap = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarRight.png"]);
+        this.fillBorder = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarCenter.png"]);
+        this.LFill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFillEnd.png"]);
+        this.RFill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFillEnd.png"]);
+        this.x =x;
+        this.y =y;
+        this.limit = limit;
+        this.length = length;
+        this.Lcap.x = this.x;
+        this.Lcap.y = this.y;
+        this.Rcap.y = this.y;
+        this.Rcap.x = this.x+this.length-6;
+        this.fillBorder.width = this.length-12;
+        this.fillBorder.x = this.x+6;
+        this.fillBorder.y = this.y+2;
+        this.fill.x = this.x+6;
+        this.fill.y = this.y+2
+        this.fill.width = this.length-12;
+        this.LFill.y = this.y+2;
+        this.LFill.x = this.x+2;
+        this.LFill.width = 4;
+        this.RFill.y = this.y+2;
+        this.RFill.x = this.x+this.length-6;
+        this.RFill.width = 4;
+        this.pos = 0;
+        this.visible = true;
+        this.setPointer(0);
+        this.allImages.addChild(this.fill);
+        this.allImages.addChild(this.Lcap);
+        this.allImages.addChild(this.Rcap);
+        this.allImages.addChild(this.fillBorder);
+        this.allImages.addChild(this.LFill);
+        this.allImages.addChild(this.RFill);
+        UIImage.addChild(this.allImages);
+    }
+    setPointer(position: number){
+        this.pos = position;
+
+    }
+    setPosition(x: number, y: number){
+        this.allImages.x+=x-this.x;
+        this.allImages.y+=y-this.y;
+        this.x = x;
+        this.y = y;
+    }
+    getBounds(){
+        return new rectangle(this.x,this.y,this.length,20);
+    }
+    remove(){
+        UIImage.removeChild(this.allImages);
+    }
+    hide(){
+        this.allImages.visible = false;
+        this.visible = false;
+    }
+    show(){
+        this.allImages.visible = true;
         this.visible = true;
     }
 }

@@ -2,14 +2,45 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class enemy extends gameObject_1.default {
+        constructor(x, y) {
+            super();
+            this.sprites = new Array();
+            this.hp = 0;
+            this.dx = 0;
+            this.dy = 0;
+            this.x = 0;
+            this.y = 0;
+            this.time = 0;
+            this.isDestroyed = false;
+            this.x = x;
+            this.y = y;
+            this.target = new PIXI.Point(0, 0);
+        }
+        hitDetect() {
+            gameEngine_1.playerBullets.forEach(bul => {
+                if (bul.hitbox.touches(this.hitbox)) {
+                    bul.destroy();
+                    this.hp -= bul.dammage;
+                    this.dx += Math.cos(bul.heading) * 0.1 * (bul.speed * bul.dammage);
+                    this.dy += Math.sin(bul.heading) * 0.1 * (bul.speed * bul.dammage);
+                    if (this.hp <= 0) {
+                        if (!this.isDestroyed) {
+                            this.dx = Math.cos(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
+                            this.dy = -Math.sin(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
+                            this.remove();
+                            this.isDestroyed = true;
+                        }
+                    }
+                }
+            });
+        }
     }
     class walker extends enemy {
-        constructor() {
-            super();
+        constructor(x, y) {
+            super(x, y);
             this.state = 0;
             this.legState = 0;
             this.animImgs = Array();
-            this.target = new PIXI.Point(0, 0);
         }
         update(deltaTime) {
             this.target = gameEngine_1.p1.hitbox.getCenter();
@@ -54,19 +85,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
                 }
             }
             this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
-            gameEngine_1.playerBullets.forEach(bul => {
-                if (bul.hitbox.touches(this.hitbox)) {
-                    bul.destroy();
-                    this.hp -= bul.dammage;
-                    this.dx += Math.cos(bul.heading) * 0.1 * (bul.speed * bul.dammage);
-                    this.dy += Math.sin(bul.heading) * 0.1 * (bul.speed * bul.dammage);
-                    if (this.hp <= 0) {
-                        this.dx = Math.cos(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
-                        this.dy = -Math.sin(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
-                        this.destroy();
-                    }
-                }
-            });
+            this.hitDetect();
             this.x += this.dx;
             this.y += this.dy;
             let modFric = this.getFrictionModifyer();
@@ -100,9 +119,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
     }
     class bulletMan extends walker {
         constructor(x, y, enemyType) {
-            super();
-            this.x = x;
-            this.y = y;
+            super(x, y);
             this.dx = 0;
             this.dy = 0;
             this.time = 0;
@@ -147,7 +164,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
         }
         shoot() {
             let posit = this.getBarrelPoistion();
-            gameEngine_1.gameEngine.makeBullet(posit.x, posit.y, shapes_1.rectangle.getAngle(posit, this.target), 3, 4, 1, true);
+            gameEngine_1.gameEngine.makeBullet(posit.x, posit.y, shapes_1.rectangle.getAngle(posit, this.target), 0, 3, 4, 1, true);
         }
         calcGunPosition() {
             if (this.hitbox.getCenter().x < gameEngine_1.p1.hitbox.x) {
@@ -187,7 +204,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
                 return new PIXI.Point(2 * (this.gun.x + Math.cos(this.gun.rotation - Math.PI / 2) * (this.gun.pivot.y - this.barrel.y)) - (this.gun.x + Math.cos(this.barrelAngle + this.gun.rotation) * this.barrelDist), 2 * (this.gun.y + Math.sin(this.gun.rotation - Math.PI / 2) * (this.gun.pivot.y - this.barrel.y)) - (this.gun.y + Math.sin(this.barrelAngle + this.gun.rotation) * this.barrelDist));
             }
         }
-        destroy() {
+        remove() {
             super.destroy();
             gameEngine_1.foreGroundImage.removeChild(this.body);
             gameEngine_1.foreGroundImage.removeChild(this.gun);
@@ -217,5 +234,36 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
         }
     }
     exports.bulletMan = bulletMan;
+    class boss extends enemy {
+        constructor(x, y) {
+            super(x, y);
+        }
+    }
+    class potato extends boss {
+        constructor(x, y) {
+            super(x, y);
+            this.hp = 1000;
+            this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["potatoBoss.png"]);
+            this.sprite.x = x;
+            this.sprite.y = y;
+            this.hitbox = new shapes_1.rectangle(x, y, 40, 60);
+            this.time = 0;
+            gameEngine_1.foreGroundImage.addChild(this.sprite);
+        }
+        update(deltaTime) {
+            this.hitDetect();
+            let dispersion = (Math.random() - 0.5);
+            this.sprite.y = this.y;
+            this.sprite.x = this.x;
+            this.target = gameEngine_1.p1.hitbox.getCenter();
+            gameEngine_1.gameEngine.makeBullet(this.x + 17 + dispersion * 20, this.y + 25, shapes_1.rectangle.getAngle(this.hitbox.getCenter(), this.target) + dispersion * 0.2, 0, 3, 5, 0, true);
+        }
+        remove() {
+            super.destroy();
+            gameEngine_1.foreGroundImage.removeChild(this.sprite);
+            gameEngine_1.currentRoom.addFloorObject(this.hitbox.getCenter().x, this.hitbox.getCenter().y, 3, this.dx, this.dy);
+        }
+    }
+    exports.potato = potato;
 });
 //# sourceMappingURL=enemys.js.map
