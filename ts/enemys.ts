@@ -1,5 +1,5 @@
 import gameObject from "./gameObject";
-import {foreGroundImage, gameEngine, p1, playerBullets, currentRoom} from "./gameEngine";
+import {foreGroundImage, gameEngine, p1, playerBullets, currentRoom, bigHealthBar} from "./gameEngine";
 import {rectangle} from "./shapes";
 
 abstract class enemy extends gameObject{
@@ -37,6 +37,7 @@ abstract class enemy extends gameObject{
     time: number=0;
     hitbox: rectangle;
     target: PIXI.Point;
+    maxHp: number=0;
     isDestroyed: boolean = false;
 }
 
@@ -129,7 +130,6 @@ abstract class walker extends enemy{
     abstract incrememtLegs():void;
 }
 export class bulletMan extends walker{
-
     AI: number; //the type of enemy behavior
     barrelDist: number; //the distance from the pivot to the barrel
     barrelAngle: number; //the angle from the pivot to the barrel 
@@ -154,6 +154,7 @@ export class bulletMan extends walker{
             case 1:
                 this.AI = 1;
                 this.hp = 20;
+                this.maxHp = 20;
                 this.speed=3;
                 this.friction = 0.3;
                 this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
@@ -221,7 +222,7 @@ export class bulletMan extends walker{
         foreGroundImage.removeChild(this.body);
         foreGroundImage.removeChild(this.gun);
         currentRoom.addFloorObject(this.hitbox.getCenter().x,this.hitbox.getCenter().y,1,this.dx,-this.dy);
-        currentRoom.addFloorObjectAdv(this.body.position.x+this.hitbox.width, this.body.position.y+10, 2, this.dx*2,-this.dy*1.5,this.gun.rotation,0.5);
+        currentRoom.addFloorObjectAdv(this.body.position.x+this.hitbox.width, this.body.position.y+10, 2, this.dx*2,-this.dy*1.5,this.gun.rotation,0.5,0,1);
     }
     incrememtLegs(){
         this.legState++;
@@ -245,6 +246,7 @@ export class bulletMan extends walker{
     }
 }
 abstract class boss extends enemy{
+    health: bigHealthBar;
     constructor(x: number,y:number ){
         super(x,y);
     }
@@ -254,6 +256,7 @@ export class potato extends boss{
     constructor(x: number, y: number){
         super(x,y);
         this.hp = 1000;
+        this.health = new bigHealthBar(50,1000,1820,this.hp);
         this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["potatoBoss.png"]);
         this.sprite.x = x;
         this.sprite.y = y;
@@ -263,15 +266,21 @@ export class potato extends boss{
     }
     update(deltaTime: number){
         this.hitDetect();
+        this.health.setPointer(this.hp);
         let dispersion = (Math.random()-0.5);
         this.sprite.y = this.y;
         this.sprite.x = this.x;
         this.target = p1.hitbox.getCenter();
-        gameEngine.makeBullet(this.x+17+dispersion*20,this.y+25, rectangle.getAngle(this.hitbox.getCenter(),this.target)+dispersion*0.2,0,3,5,0,true);
+        //gameEngine.makeBullet(this.x+17+dispersion*20,this.y+25, rectangle.getAngle(this.hitbox.getCenter(),this.target)+dispersion*0.2,0,3,5,0,true);
     }
     remove(){
         super.destroy();
         foreGroundImage.removeChild(this.sprite);
         currentRoom.addFloorObject(this.hitbox.getCenter().x,this.hitbox.getCenter().y,3,this.dx,this.dy);
+        this.health.remove();
+        for(let i = 0; i < 250; i++){
+            let launchRate= Math.random()*1.5;
+            currentRoom.addFloorObjectAdv(i*7+50,1000,4,Math.random()*10*launchRate-5*launchRate,Math.random()*12*launchRate-6*launchRate,Math.random()*Math.PI,Math.random()*Math.PI, 0.01, 1/launchRate+0.5);
+        }
     }
 }

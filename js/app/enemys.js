@@ -11,6 +11,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
             this.x = 0;
             this.y = 0;
             this.time = 0;
+            this.maxHp = 0;
             this.isDestroyed = false;
             this.x = x;
             this.y = y;
@@ -138,6 +139,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
                 case 1:
                     this.AI = 1;
                     this.hp = 20;
+                    this.maxHp = 20;
                     this.speed = 3;
                     this.friction = 0.3;
                     this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
@@ -209,7 +211,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
             gameEngine_1.foreGroundImage.removeChild(this.body);
             gameEngine_1.foreGroundImage.removeChild(this.gun);
             gameEngine_1.currentRoom.addFloorObject(this.hitbox.getCenter().x, this.hitbox.getCenter().y, 1, this.dx, -this.dy);
-            gameEngine_1.currentRoom.addFloorObjectAdv(this.body.position.x + this.hitbox.width, this.body.position.y + 10, 2, this.dx * 2, -this.dy * 1.5, this.gun.rotation, 0.5);
+            gameEngine_1.currentRoom.addFloorObjectAdv(this.body.position.x + this.hitbox.width, this.body.position.y + 10, 2, this.dx * 2, -this.dy * 1.5, this.gun.rotation, 0.5, 0, 1);
         }
         incrememtLegs() {
             this.legState++;
@@ -243,6 +245,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
         constructor(x, y) {
             super(x, y);
             this.hp = 1000;
+            this.health = new gameEngine_1.bigHealthBar(50, 1000, 1820, this.hp);
             this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["potatoBoss.png"]);
             this.sprite.x = x;
             this.sprite.y = y;
@@ -252,16 +255,21 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes"], funct
         }
         update(deltaTime) {
             this.hitDetect();
+            this.health.setPointer(this.hp);
             let dispersion = (Math.random() - 0.5);
             this.sprite.y = this.y;
             this.sprite.x = this.x;
             this.target = gameEngine_1.p1.hitbox.getCenter();
-            gameEngine_1.gameEngine.makeBullet(this.x + 17 + dispersion * 20, this.y + 25, shapes_1.rectangle.getAngle(this.hitbox.getCenter(), this.target) + dispersion * 0.2, 0, 3, 5, 0, true);
         }
         remove() {
             super.destroy();
             gameEngine_1.foreGroundImage.removeChild(this.sprite);
             gameEngine_1.currentRoom.addFloorObject(this.hitbox.getCenter().x, this.hitbox.getCenter().y, 3, this.dx, this.dy);
+            this.health.remove();
+            for (let i = 0; i < 250; i++) {
+                let launchRate = Math.random() * 1.5;
+                gameEngine_1.currentRoom.addFloorObjectAdv(i * 7 + 50, 1000, 4, Math.random() * 10 * launchRate - 5 * launchRate, Math.random() * 12 * launchRate - 6 * launchRate, Math.random() * Math.PI, Math.random() * Math.PI, 0.01, 1 / launchRate + 0.5);
+            }
         }
     }
     exports.potato = potato;

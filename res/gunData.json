@@ -74,11 +74,11 @@
         "barrelMachineGun":{
             "fireRate": 0.25,
             "fireSpeed" : 10,
-            "dammage" : 0.3,
+            "dammage" : 15,
             "bulletType": 1,
             "capacity": 500,
             "reloadTime": 120,
-            "totalCapacity": 3000,
+            "totalCapacity": 8000,
             "handle": {"x":17, "y":19},
             "barrel": {"x": 49, "y": 6},
             "bulletSpread": 0.2,

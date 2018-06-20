@@ -1,11 +1,11 @@
-define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemys"], function (require, exports, shapes_1, keyboard_1, gameObject_1, enemys_1) {
+define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemys", "./main"], function (require, exports, shapes_1, keyboard_1, gameObject_1, enemys_1, main_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class gameEngine {
         constructor(app) {
             pixiApp = app;
             timeDilate = 1;
-            this.mouse = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["cursor1.png"]);
+            this.mouse = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "cursor1"));
             pixiApp.stage.addChild(exports.backGroundImage);
             pixiApp.stage.addChild(exports.midGroundImage);
             pixiApp.stage.addChild(exports.foreGroundImage);
@@ -16,6 +16,11 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             exports.currentRoom = new room(new shapes_1.rectangle(0, 0, 0, 0));
             this.makePlayer(100, 100);
             new enemys_1.potato(500, 500);
+            new enemys_1.bulletMan(Math.random() * 1800 + 50, Math.random() * 1000 + 50, 1);
+            new enemys_1.bulletMan(Math.random() * 1800 + 50, Math.random() * 1000 + 50, 1);
+            new enemys_1.bulletMan(Math.random() * 1800 + 50, Math.random() * 1000 + 50, 1);
+            new enemys_1.bulletMan(Math.random() * 1800 + 50, Math.random() * 1000 + 50, 1);
+            new enemys_1.bulletMan(Math.random() * 1800 + 50, Math.random() * 1000 + 50, 1);
         }
         makePlayer(x, y) {
             exports.p1 = new player(x, y);
@@ -26,7 +31,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             exports.gameObjects.forEach(element => {
                 element.update(deltaTime * timeDilate);
             });
-            exports.currentRoom.update(deltaTime * timeDilate);
+            exports.bufferGameObjects.forEach(obj => {
+                exports.gameObjects.push(obj);
+            });
             exports.removeGameObjects.forEach(obj => {
                 exports.gameObjects.splice(exports.gameObjects.indexOf(obj), 1);
             });
@@ -38,10 +45,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     exports.playerBullets.push(obj);
                 }
             });
-            bufferBullets = new Array();
-            exports.bufferGameObjects.forEach(obj => {
-                exports.gameObjects.push(obj);
-            });
+            exports.currentRoom.update(deltaTime * timeDilate);
+            bufferBullets = Array();
             exports.bufferGameObjects = Array();
             exports.removeGameObjects = Array();
             animator.animate(deltaTime * timeDilate);
@@ -52,6 +57,12 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 if (timeDilate > 0) {
                     timeDilate -= 0.01;
                 }
+            }
+            if (keyboard_1.default.getToggle(32)) {
+                exports.currentRoom.compress();
+            }
+            if (keyboard_1.default.getToggle(76)) {
+                exports.currentRoom.uncompress();
             }
             keyboard_1.default.resetToggle();
         }
@@ -91,7 +102,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.guns[0].switchGunIn(this.ammoCounter, this.reloadBar);
             this.currentGun = 0;
             this.hitbox = new shapes_1.rectangle(x, y, this.sprite.width, this.sprite.height);
-            this.healthBar = new bigHealthBar(50, 900, 1800, 5);
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
@@ -206,8 +216,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.sprite.anchor.x = 0.5;
             this.sprite.anchor.y = 0.5;
             bufferBullets.push(this);
-            this.update(backDate);
             exports.foreGroundImage.addChild(this.sprite);
+            this.backDate(backDate);
         }
         update(deltaTime) {
             this.x += this.speed * Math.cos(this.heading) * deltaTime;
@@ -217,63 +227,43 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
             walls.forEach(r => {
                 if (this.hitbox.intersects(r)) {
-                    this.sprite.texture = PIXI.Texture.WHITE;
                     this.destroy();
                 }
             });
         }
+        backDate(deltaTime) {
+            this.x += this.speed * Math.cos(this.heading) * deltaTime;
+            this.y += this.speed * Math.sin(this.heading) * deltaTime;
+            this.sprite.x = this.x + this.sprite.width / 2;
+            this.sprite.y = this.y + this.sprite.height / 2;
+            this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
+        }
         destroy() {
             if (!this.isDestroyed) {
-                try {
-                    super.destroy();
-                    animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y, this.type, this.heading);
-                    this.isDestroyed = true;
-                    exports.foreGroundImage.removeChild(this.sprite);
-                    if (this.enemy) {
-                        exports.enemyBullets.splice(exports.enemyBullets.indexOf(this), 1);
-                    }
-                    else {
-                        exports.playerBullets.splice(exports.playerBullets.indexOf(this), 1);
-                        ;
-                    }
+                super.destroy();
+                animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y, this.type, this.heading);
+                exports.foreGroundImage.removeChild(this.sprite);
+                if (this.enemy) {
+                    exports.enemyBullets.splice(exports.enemyBullets.indexOf(this), 1);
                 }
-                catch (e) {
-                    console.log(e);
+                else {
+                    exports.playerBullets.splice(exports.playerBullets.indexOf(this), 1);
                 }
+                this.isDestroyed = true;
             }
         }
         getBulletType(index) {
             switch (index) {
                 case 1:
-                    return PIXI.loader.resources["res/bullets.json"].textures["smallYellow.png"];
+                    return main_1.load.loadUnboardered("bullets", "smallYellow");
                 case 2:
-                    return PIXI.loader.resources["res/bullets.json"].textures["crossBolt.png"];
+                    return main_1.load.loadUnboardered("bullets", "crossBolt");
                 case 3:
-                    return PIXI.loader.resources["res/bullets.json"].textures["smallRed.png"];
+                    return main_1.load.loadUnboardered("bullets", "smallRed");
                 case 4:
-                    return PIXI.loader.resources["res/bullets.json"].textures["nail.png"];
+                    return main_1.load.loadUnboardered("bullets", "nail");
             }
             return PIXI.Texture.WHITE;
-        }
-    }
-    class explosion extends bullet {
-        constructor(x, y, radius, type, dammage) {
-            super(x, y, 0, type, 0, 0, dammage, true);
-            this.framePassed = false;
-            exports.playerBullets.push(this);
-        }
-        update() {
-            if (this.framePassed) {
-            }
-            else {
-                this.framePassed = true;
-            }
-        }
-        destroy() {
-        }
-        expire() {
-            exports.enemyBullets.splice(exports.enemyBullets.indexOf(this), 1);
-            exports.playerBullets.splice(exports.playerBullets.indexOf(this), 1);
         }
     }
     class gun {
@@ -291,47 +281,47 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             switch (type) {
                 case 1:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackPistol;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackPistol.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "blackPistol"));
                     break;
                 case 2:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodAK;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["woodAK.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "woodAK"));
                     break;
                 case 3:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.metalSidearm;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["metalSidearm.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "metalSidearm"));
                     break;
                 case 4:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackSidearm;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSidearm.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "blackSidearm"));
                     break;
                 case 5:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.barrelMachineGun;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["barrelMachineGun.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "barrelMachineGun"));
                     break;
                 case 6:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.dEagle;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["dEagle.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "dEagle"));
                     break;
                 case 7:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodSidearm;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["woodSidearm.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "woodSidearm"));
                     break;
                 case 8:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.barrelWood;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["barrelWood.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "barrelWood"));
                     break;
                 case 9:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackSniper;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSniper.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "blackSniper"));
                     break;
                 case 10:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodShotGun;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["woodShotGun.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "woodShotGun"));
                     break;
                 case 11:
                     gun = PIXI.loader.resources["res/gunData.json"].data.guns.nailGun;
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["nailGun.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "nailGun"));
                     break;
             }
             this.sprite.pivot = new PIXI.Point(gun.handle.x, gun.handle.y);
@@ -479,13 +469,17 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
     }
     class floorObject {
-        constructor(x, y, type, dx, dy, rotation, spin, owner) {
+        constructor(x, y, type, dx, dy, rotation, spin, fadeRate, scale, owner) {
             this.getTypeProperties(type);
             this.sprite.position.x = x;
             this.sprite.position.y = y;
+            this.sprite.width *= scale;
+            this.sprite.height *= scale;
+            this.scale = scale;
             this.dy = dy;
             this.dx = dx;
             this.owner = owner;
+            this.fade = fadeRate;
             this.type = type;
             this.sprite.rotation = rotation;
             this.spin = spin;
@@ -501,37 +495,57 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 this.dy *= Math.pow(0.9, deltaTime);
                 walls.forEach(e => {
                     if (e.intersects(new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height))) {
-                        this.dx *= -1.1;
-                        this.dy *= -1.1;
+                        this.dx *= -1.1 ^ deltaTime;
+                        this.dy *= -1.1 ^ deltaTime;
                     }
                 });
                 this.sprite.rotation += this.spin * deltaTime;
                 this.sprite.position.x += this.dx * deltaTime;
                 this.sprite.position.y += this.dy * deltaTime;
             }
+            if (this.sprite.alpha > 0) {
+                this.sprite.alpha -= this.fade * deltaTime;
+            }
+            else {
+                this.remove();
+            }
         }
         getTypeProperties(type) {
             switch (type) {
                 case 1:
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManDead.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadBoardered("characters", "bulletManDead"));
                     break;
                 case 2:
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackSidearm.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "blackSidearm"));
                     break;
                 case 3:
-                    this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["potatoBossDead.png"]);
+                    this.sprite = new PIXI.Sprite(main_1.load.loadBoardered("characters", "potatoBossDead"));
+                    break;
+                case 4:
+                    this.sprite = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "glassShard"));
                     break;
             }
         }
         compress() {
+            if (this.fade == 0) {
+                exports.midGroundImage.removeChild(this.sprite);
+                this.owner.addCompressed(this.sprite.position.x, this.sprite.position.y, this.type, this.sprite.rotation, this.scale);
+                this.owner.removeFloorObjects.push(this);
+            }
+            else {
+                this.remove();
+            }
+        }
+        remove() {
             exports.midGroundImage.removeChild(this.sprite);
-            this.owner.addCompressed(this.sprite.position.x, this.sprite.position.y, this.type, this.sprite.rotation);
             this.owner.floorObjects.splice(this.owner.floorObjects.indexOf(this), 1);
         }
     }
     class room {
         constructor(shape) {
+            this.removeFloorObjects = Array();
             this.floorObjects = Array();
+            this.compressed = new Array();
         }
         update(deltaTime) {
             this.floorObjects.forEach(element => {
@@ -544,22 +558,27 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.floorObjects.forEach(e => {
                 e.compress();
             });
+            this.removeFloorObjects.forEach(e => {
+                this.floorObjects.splice(this.floorObjects.indexOf(e), 1);
+            });
+            this.removeFloorObjects = Array();
         }
         enter() {
         }
         uncompress() {
             this.compressed.forEach(element => {
-                new floorObject(element.x, element.y, element.type, 0, 0, element.rotation, 0, this);
+                new floorObject(element.x, element.y, element.type, 0, 0, element.rotation, 0, 0, element.scale, this);
             });
+            this.compressed = new Array();
         }
-        addCompressed(x, y, type, rotation) {
-            this.compressed.push({ x, y, type, rotation });
+        addCompressed(x, y, type, rotation, scale) {
+            this.compressed.push({ x, y, type, rotation, scale });
         }
         addFloorObject(x, y, type, dx, dy) {
-            new floorObject(x, y, type, dx, dy, 0, 0, this);
+            new floorObject(x, y, type, dx, dy, 0, 0, 0, 1, this);
         }
-        addFloorObjectAdv(x, y, type, dx, dy, rotation, spin) {
-            new floorObject(x, y, type, dx, dy, rotation, spin, this);
+        addFloorObjectAdv(x, y, type, dx, dy, rotation, spin, fade, scale) {
+            new floorObject(x, y, type, dx, dy, rotation, spin, fade, scale, this);
         }
     }
     class wall {
@@ -676,41 +695,41 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         getAnimFrames(type) {
             switch (type) {
                 case 1:
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp1.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp2.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp3.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp4.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp5.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp6.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallYellowExp7.png"]);
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp1"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp2"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp3"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp4"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp5"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp6"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp7"));
                     break;
                 case 2:
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp1.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp2.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp3.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp4.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp5.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp6.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp7.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp8.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp9.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp10.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp11.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["crossBoltExp12.png"]);
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp1"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp2"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp3"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp4"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp5"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp6"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp7"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp8"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp9"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp10"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp11"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "crossBoltExp12"));
                     break;
                 case 3:
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp1.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp2.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["smallRedExp3.png"]);
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallRedExp1"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallRedExp2"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "smallRedExp3"));
                     break;
                 case 4:
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp1.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp2.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp3.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp4.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp5.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp6.png"]);
-                    this.img.push(PIXI.loader.resources["res/bullets.json"].textures["nailExp7.png"]);
+                    this.img.push(main_1.load.loadUnboardered("bullets", "nailExp1"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "nailExp2"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "nailExp3"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "nailExp4"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "nailExp5"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "nailExp6"));
+                    this.img.push(main_1.load.loadUnboardered("bullets", "nailExp7"));
                     break;
             }
             this.frames = this.img.length;
@@ -907,18 +926,16 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         constructor(x, y, length, limit) {
             super();
             this.allImages = new PIXI.Container();
-            if (length < 12) {
-                throw "tooSmall";
-            }
-            this.fill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFill.png"]);
-            this.Lcap = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarLeft.png"]);
-            this.Rcap = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarRight.png"]);
-            this.fillBorder = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarCenter.png"]);
-            this.LFill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFillEnd.png"]);
-            this.RFill = new PIXI.Sprite(PIXI.loader.resources["res/UIElements.json"].textures["bigHealthBarFillEnd.png"]);
+            this.limit = limit;
+            this.length = Math.max(12, length);
+            this.fill = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "bigHealthBarFill"));
+            this.Lcap = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "bigHealthBarLeft"));
+            this.Rcap = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "bigHealthBarRight"));
+            this.fillBorder = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "bigHealthBarCenter"));
+            this.LFill = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "bigHealthBarFillEnd"));
+            this.RFill = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "bigHealthBarFillEnd"));
             this.x = x;
             this.y = y;
-            this.limit = limit;
             this.length = length;
             this.Lcap.x = this.x;
             this.Lcap.y = this.y;
@@ -926,7 +943,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.Rcap.x = this.x + this.length - 6;
             this.fillBorder.width = this.length - 12;
             this.fillBorder.x = this.x + 6;
-            this.fillBorder.y = this.y + 2;
+            this.fillBorder.y = this.y;
             this.fill.x = this.x + 6;
             this.fill.y = this.y + 2;
             this.fill.width = this.length - 12;
@@ -936,19 +953,21 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.RFill.y = this.y + 2;
             this.RFill.x = this.x + this.length - 6;
             this.RFill.width = 4;
-            this.pos = 0;
             this.visible = true;
             this.setPointer(0);
+            this.allImages.addChild(this.LFill);
+            this.allImages.addChild(this.RFill);
             this.allImages.addChild(this.fill);
             this.allImages.addChild(this.Lcap);
             this.allImages.addChild(this.Rcap);
             this.allImages.addChild(this.fillBorder);
-            this.allImages.addChild(this.LFill);
-            this.allImages.addChild(this.RFill);
             UIImage.addChild(this.allImages);
         }
         setPointer(position) {
-            this.pos = position;
+            let curWidth = (this.length) * (position / this.limit);
+            this.RFill.width = Math.min(Math.max(0, curWidth - this.length + 4), 4);
+            this.fill.width = Math.min(Math.max(0, curWidth - 6), this.length - 12);
+            this.LFill.width = Math.min(Math.max(0, curWidth), 4);
         }
         setPosition(x, y) {
             this.allImages.x += x - this.x;
@@ -970,7 +989,11 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.allImages.visible = true;
             this.visible = true;
         }
+        setLimit(limit) {
+            this.limit = limit;
+        }
     }
+    exports.bigHealthBar = bigHealthBar;
     let pixiApp;
     exports.gameObjects = new Array();
     exports.bufferGameObjects = new Array();

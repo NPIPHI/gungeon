@@ -21,5 +21,15 @@ define(["require", "exports", "./gameEngine"], function (require, exports, gameE
         app.ticker.add(delta => gameLoop(delta));
     }
     var time = 0;
+    class load {
+        static loadBoardered(json, file) {
+            let bufferTexture = PIXI.loader.resources["res/" + json + ".json"].textures[file + ".png"];
+            return new PIXI.Texture(bufferTexture.baseTexture, new PIXI.Rectangle(bufferTexture.frame.x + 1, bufferTexture.frame.y + 1, bufferTexture.width - 2, bufferTexture.height - 2));
+        }
+        static loadUnboardered(json, file) {
+            return PIXI.loader.resources["res/" + json + ".json"].textures[file + ".png"];
+        }
+    }
+    exports.load = load;
 });
 //# sourceMappingURL=main.js.map

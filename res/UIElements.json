@@ -2,7 +2,7 @@
 
 "0.png":
 {
-	"frame": {"x":0,"y":0,"w":15,"h":15},
+	"frame": {"x":0,"y":20,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -10,7 +10,7 @@
 },
 "1.png":
 {
-	"frame": {"x":15,"y":0,"w":6,"h":15},
+	"frame": {"x":16,"y":0,"w":6,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":15},
@@ -18,7 +18,7 @@
 },
 "2.png":
 {
-	"frame": {"x":21,"y":0,"w":15,"h":15},
+	"frame": {"x":15,"y":20,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -26,7 +26,7 @@
 },
 "3.png":
 {
-	"frame": {"x":36,"y":0,"w":15,"h":15},
+	"frame": {"x":91,"y":0,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -34,7 +34,7 @@
 },
 "4.png":
 {
-	"frame": {"x":51,"y":0,"w":15,"h":15},
+	"frame": {"x":30,"y":20,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -42,7 +42,7 @@
 },
 "5.png":
 {
-	"frame": {"x":66,"y":0,"w":15,"h":15},
+	"frame": {"x":45,"y":20,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -50,7 +50,7 @@
 },
 "6.png":
 {
-	"frame": {"x":81,"y":0,"w":15,"h":15},
+	"frame": {"x":60,"y":20,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -58,7 +58,7 @@
 },
 "7.png":
 {
-	"frame": {"x":96,"y":0,"w":15,"h":15},
+	"frame": {"x":76,"y":0,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -66,7 +66,7 @@
 },
 "8.png":
 {
-	"frame": {"x":111,"y":0,"w":15,"h":15},
+	"frame": {"x":46,"y":0,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -74,7 +74,7 @@
 },
 "9.png":
 {
-	"frame": {"x":126,"y":0,"w":15,"h":15},
+	"frame": {"x":61,"y":0,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
@@ -82,31 +82,31 @@
 },
 "bigHealthBarCenter.png":
 {
-	"frame": {"x":141,"y":0,"w":1,"h":20},
+	"frame": {"x":0,"y":64,"w":100,"h":20},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":20},
-	"sourceSize": {"w":1,"h":20}
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":20},
+	"sourceSize": {"w":100,"h":20}
 },
 "bigHealthBarFill.png":
 {
-	"frame": {"x":142,"y":0,"w":1,"h":16},
+	"frame": {"x":0,"y":48,"w":100,"h":16},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":16},
-	"sourceSize": {"w":1,"h":16}
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":16},
+	"sourceSize": {"w":100,"h":16}
 },
 "bigHealthBarFillEnd.png":
 {
-	"frame": {"x":143,"y":0,"w":1,"h":14},
+	"frame": {"x":0,"y":0,"w":4,"h":14},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1,"h":14},
-	"sourceSize": {"w":1,"h":14}
+	"spriteSourceSize": {"x":0,"y":0,"w":4,"h":14},
+	"sourceSize": {"w":4,"h":14}
 },
 "bigHealthBarLeft.png":
 {
-	"frame": {"x":144,"y":0,"w":6,"h":20},
+	"frame": {"x":4,"y":0,"w":6,"h":20},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":20},
@@ -114,7 +114,7 @@
 },
 "bigHealthBarRight.png":
 {
-	"frame": {"x":150,"y":0,"w":6,"h":20},
+	"frame": {"x":10,"y":0,"w":6,"h":20},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":20},
@@ -122,15 +122,23 @@
 },
 "cursor1.png":
 {
-	"frame": {"x":156,"y":0,"w":15,"h":15},
+	"frame": {"x":31,"y":0,"w":15,"h":15},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
 	"sourceSize": {"w":15,"h":15}
 },
+"glassShard.png":
+{
+	"frame": {"x":75,"y":20,"w":32,"h":28},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":28},
+	"sourceSize": {"w":32,"h":28}
+},
 "pointer.png":
 {
-	"frame": {"x":171,"y":0,"w":9,"h":12},
+	"frame": {"x":22,"y":0,"w":9,"h":12},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":12},
@@ -138,7 +146,7 @@
 },
 "whiteLine.png":
 {
-	"frame": {"x":0,"y":20,"w":100,"h":3},
+	"frame": {"x":0,"y":84,"w":100,"h":3},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":3},
@@ -149,8 +157,8 @@
 	"version": "1.0",
 	"image": "UIElements.png",
 	"format": "RGBA8888",
-	"size": {"w":180,"h":23},
+	"size": {"w":107,"h":87},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:bcbcfea99e82e281f776a36397aef341:129ddccf1406433329f3c46d90e51bc1:341576581b5d6dad21b5015694e81212$"
+	"smartupdate": "$TexturePacker:SmartUpdate:56ecc5aff636a65e9d413c513e25ffc9:3346019e13149cb6770114c6e426ad65:341576581b5d6dad21b5015694e81212$"
 }
 }

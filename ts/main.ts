@@ -20,6 +20,15 @@ function setup() {
 }
 var time = 0;
 
+export class load{
+  static loadBoardered(json: string, file: string):PIXI.Texture{
+      let bufferTexture = PIXI.loader.resources["res/"+json+".json"].textures[file+".png"];
+      return new PIXI.Texture(bufferTexture.baseTexture, new PIXI.Rectangle(bufferTexture.frame.x+1,bufferTexture.frame.y+1,bufferTexture.width-2,bufferTexture.height-2));
+  }
+  static loadUnboardered(json: string, file: string):PIXI.Texture{
+      return PIXI.loader.resources["res/"+json+".json"].textures[file+".png"];
+  }
+}
 /*class Thing {
 
   private _status: string;
