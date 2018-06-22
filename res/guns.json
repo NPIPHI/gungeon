@@ -2,7 +2,7 @@
 
 "barrelMachineGun.png":
 {
-	"frame": {"x":161,"y":0,"w":49,"h":20},
+	"frame": {"x":57,"y":17,"w":49,"h":20},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":49,"h":20},
@@ -10,7 +10,7 @@
 },
 "barrelWood.png":
 {
-	"frame": {"x":51,"y":20,"w":48,"h":23},
+	"frame": {"x":0,"y":60,"w":48,"h":23},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":23},
@@ -18,7 +18,7 @@
 },
 "blackAK.png":
 {
-	"frame": {"x":41,"y":45,"w":49,"h":26},
+	"frame": {"x":41,"y":109,"w":49,"h":26},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":49,"h":26},
@@ -26,7 +26,7 @@
 },
 "blackGrenadeLauncher.png":
 {
-	"frame": {"x":0,"y":20,"w":51,"h":20},
+	"frame": {"x":0,"y":37,"w":51,"h":20},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":20},
@@ -42,7 +42,7 @@
 },
 "blackSidearm.png":
 {
-	"frame": {"x":19,"y":0,"w":19,"h":17},
+	"frame": {"x":37,"y":0,"w":19,"h":17},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":17},
@@ -50,7 +50,7 @@
 },
 "blackSMG.png":
 {
-	"frame": {"x":187,"y":45,"w":50,"h":32},
+	"frame": {"x":0,"y":164,"w":50,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":32},
@@ -58,7 +58,7 @@
 },
 "blackSniper.png":
 {
-	"frame": {"x":123,"y":45,"w":64,"h":29},
+	"frame": {"x":0,"y":135,"w":64,"h":29},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":29},
@@ -66,7 +66,7 @@
 },
 "dEagle.png":
 {
-	"frame": {"x":104,"y":0,"w":32,"h":19},
+	"frame": {"x":0,"y":17,"w":32,"h":19},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":19},
@@ -74,15 +74,23 @@
 },
 "ivorySniper.png":
 {
-	"frame": {"x":99,"y":20,"w":51,"h":23},
+	"frame": {"x":51,"y":37,"w":51,"h":23},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":23},
 	"sourceSize": {"w":51,"h":23}
 },
+"laserGun.png":
+{
+	"frame": {"x":48,"y":60,"w":52,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":24},
+	"sourceSize": {"w":52,"h":24}
+},
 "metalSidearm.png":
 {
-	"frame": {"x":86,"y":0,"w":18,"h":17},
+	"frame": {"x":19,"y":0,"w":18,"h":17},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":17},
@@ -90,7 +98,7 @@
 },
 "nailGun.png":
 {
-	"frame": {"x":0,"y":45,"w":41,"h":25},
+	"frame": {"x":0,"y":109,"w":41,"h":25},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":41,"h":25},
@@ -98,7 +106,7 @@
 },
 "uzi.png":
 {
-	"frame": {"x":90,"y":45,"w":33,"h":29},
+	"frame": {"x":64,"y":135,"w":33,"h":29},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":33,"h":29},
@@ -106,7 +114,7 @@
 },
 "waterGun.png":
 {
-	"frame": {"x":150,"y":20,"w":41,"h":25},
+	"frame": {"x":50,"y":84,"w":41,"h":25},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":41,"h":25},
@@ -114,7 +122,7 @@
 },
 "woodAK.png":
 {
-	"frame": {"x":191,"y":20,"w":50,"h":25},
+	"frame": {"x":0,"y":84,"w":50,"h":25},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":25},
@@ -122,7 +130,7 @@
 },
 "woodShotGun.png":
 {
-	"frame": {"x":38,"y":0,"w":48,"h":17},
+	"frame": {"x":56,"y":0,"w":48,"h":17},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":17},
@@ -130,7 +138,7 @@
 },
 "woodSidearm.png":
 {
-	"frame": {"x":136,"y":0,"w":25,"h":19},
+	"frame": {"x":32,"y":17,"w":25,"h":19},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":25,"h":19},
@@ -141,8 +149,8 @@
 	"version": "1.0",
 	"image": "guns.png",
 	"format": "RGBA8888",
-	"size": {"w":241,"h":77},
+	"size": {"w":106,"h":196},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:283e7b660eb851aaa05fe2ccba37f606:8b39b2d84679665d89d4c2d0617b5984:62c1f540b5fd80b9e41584087e1ed9b4$"
+	"smartupdate": "$TexturePacker:SmartUpdate:cb8c3a11cf4e4c9cfd698c147f9c3bc4:d44f87a7368899680ee601883d35c5e6:62c1f540b5fd80b9e41584087e1ed9b4$"
 }
 }

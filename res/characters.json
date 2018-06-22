@@ -2,7 +2,7 @@
 
 "bulletMan.png":
 {
-	"frame": {"x":22,"y":36,"w":22,"h":32},
+	"frame": {"x":44,"y":18,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
@@ -10,7 +10,7 @@
 },
 "bulletManBack.png":
 {
-	"frame": {"x":22,"y":68,"w":22,"h":32},
+	"frame": {"x":66,"y":18,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
@@ -18,7 +18,7 @@
 },
 "bulletManDead.png":
 {
-	"frame": {"x":22,"y":5,"w":31,"h":31},
+	"frame": {"x":0,"y":50,"w":31,"h":31},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":31,"h":31},
@@ -26,7 +26,7 @@
 },
 "bulletManLeft.png":
 {
-	"frame": {"x":0,"y":68,"w":22,"h":32},
+	"frame": {"x":22,"y":18,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
@@ -34,7 +34,7 @@
 },
 "bulletManLegs0.png":
 {
-	"frame": {"x":22,"y":0,"w":22,"h":5},
+	"frame": {"x":44,"y":0,"w":22,"h":5},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":5},
@@ -42,7 +42,7 @@
 },
 "bulletManLegs1.png":
 {
-	"frame": {"x":0,"y":5,"w":22,"h":5},
+	"frame": {"x":0,"y":0,"w":22,"h":5},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":5},
@@ -50,7 +50,7 @@
 },
 "bulletManLegs2.png":
 {
-	"frame": {"x":0,"y":0,"w":22,"h":5},
+	"frame": {"x":22,"y":0,"w":22,"h":5},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":5},
@@ -58,15 +58,31 @@
 },
 "bulletManRight.png":
 {
-	"frame": {"x":0,"y":36,"w":22,"h":32},
+	"frame": {"x":0,"y":18,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
 	"sourceSize": {"w":22,"h":32}
 },
+"frog.png":
+{
+	"frame": {"x":66,"y":0,"w":18,"h":18},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":18},
+	"sourceSize": {"w":18,"h":18}
+},
+"frogCheek.png":
+{
+	"frame": {"x":84,"y":0,"w":22,"h":18},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":18},
+	"sourceSize": {"w":22,"h":18}
+},
 "potatoBoss.png":
 {
-	"frame": {"x":0,"y":209,"w":42,"h":60},
+	"frame": {"x":31,"y":50,"w":42,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":42,"h":60},
@@ -74,7 +90,7 @@
 },
 "potatoBossClosed.png":
 {
-	"frame": {"x":0,"y":149,"w":42,"h":60},
+	"frame": {"x":73,"y":50,"w":42,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":42,"h":60},
@@ -82,19 +98,27 @@
 },
 "potatoBossDead.png":
 {
-	"frame": {"x":0,"y":100,"w":61,"h":49},
+	"frame": {"x":51,"y":110,"w":61,"h":49},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":61,"h":49},
 	"sourceSize": {"w":61,"h":49}
+},
+"potatoBossShadow.png":
+{
+	"frame": {"x":0,"y":110,"w":51,"h":53},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":53},
+	"sourceSize": {"w":51,"h":53}
 }},
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "characters.png",
 	"format": "RGBA8888",
-	"size": {"w":61,"h":269},
+	"size": {"w":115,"h":163},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:edf9fcdc0b548f583f564dff825e6504:ef7fbdaa75235b7576549fb5536beff2:a5fe7db4b869eb0f3e0b2940b9577ea8$"
+	"smartupdate": "$TexturePacker:SmartUpdate:6449c5a4d7866e28c3c1f5e0d3d1b4a9:101a777d82f1de92512f5dc7db9afabf:a5fe7db4b869eb0f3e0b2940b9577ea8$"
 }
 }

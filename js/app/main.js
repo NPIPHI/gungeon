@@ -10,6 +10,7 @@ define(["require", "exports", "./gameEngine"], function (require, exports, gameE
     PIXI.loader.add("res/gunData.json");
     PIXI.loader.add("res/characters.json");
     PIXI.loader.add("res/guns.json");
+    PIXI.loader.add("res/gunShot.mp3");
     PIXI.loader.load(setup);
     function setup() {
         function gameLoop(delta) {

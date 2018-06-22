@@ -105,8 +105,9 @@ class player extends gameObject{
         this.sprite.position = new PIXI.Point(x,y);
         this.reloadBar = new progressBar(x,y-50,40,1);
         this.ammoCounter = new fractionCounter(screen.width-50,screen.height-50, 0,0,true);
-        this.guns.push(new gun(1));
-        this.guns.push(new gun(5));
+        for(let i = 0; i < 12; i ++){
+            this.guns.push(new gun(i+1));
+        }
         this.guns[0].switchGunIn(this.ammoCounter,this.reloadBar);
         this.currentGun = 0;
         this.hitbox = new rectangle(x,y,this.sprite.width,this.sprite.height);
@@ -234,7 +235,7 @@ class bullet extends gameObject{
         this.sprite.anchor.x=0.5;
         this.sprite.anchor.y=0.5;
         bufferBullets.push(this);
-        foreGroundImage.addChild(this.sprite);
+        midGroundImage.addChild(this.sprite);
         this.backDate(backDate);
     }
     update(deltaTime: number){
@@ -260,7 +261,7 @@ class bullet extends gameObject{
         if(!this.isDestroyed){
             super.destroy();
             animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y,this.type, this.heading);
-            foreGroundImage.removeChild(this.sprite);
+            midGroundImage.removeChild(this.sprite);
             if(this.enemy){
                 enemyBullets.splice(enemyBullets.indexOf(this),1);
             } else {
@@ -279,6 +280,8 @@ class bullet extends gameObject{
                 return load.loadUnboardered("bullets","smallRed");
             case 4:
                 return load.loadUnboardered("bullets","nail");
+            case 5: 
+                return load.loadBoardered("bullets","laser");
         }
         return PIXI.Texture.WHITE;
     }
@@ -306,6 +309,7 @@ class gun{
     bulletSpread: number;  //the angle that bullets are spread 1 degree means max 0.5 deg left and right
     barrel: PIXI.Point; // the barrel position
     bulletNum: number; //the number of bullets shot in one round more than one means some bullets will be backdated
+    shotAudio: HTMLAudioElement;
     constructor(type: number,){
         if(type!=0){
             this.getTypePropeties(type);
@@ -318,46 +322,62 @@ class gun{
             case 1: //blackPistol
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackPistol;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","blackPistol"));
+                this.shotAudio = new Audio("res/pistolShot.mp3");
                 break;
             case 2: //wood AK
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodAK;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","woodAK"));
+                this.shotAudio = new Audio("res/machineGunShot.mp3");
                 break;
             case 3: //metalSidearm
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.metalSidearm;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","metalSidearm"));
+                this.shotAudio = new Audio("res/pistolShot.mp3");
                 break;
             case 4:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackSidearm;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","blackSidearm"));
+                this.shotAudio = new Audio("res/pistolShot.mp3");
                 break;
              case 5:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.barrelMachineGun;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","barrelMachineGun"));
+                this.shotAudio = new Audio("res/machineGunShot.mp3");
                 break;
             case 6:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.dEagle;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","dEagle"));
+                this.shotAudio = new Audio("res/dEagleShot.mp3");
                 break;
             case 7:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodSidearm;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","woodSidearm"));
+                this.shotAudio = new Audio("res/pistolShot.mp3");
                 break;
              case 8:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.barrelWood;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","barrelWood"));
+                this.shotAudio = new Audio("res/machineGunShot.mp3");
                 break;
              case 9:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.blackSniper;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","blackSniper"));
+                this.shotAudio = new Audio("res/sniperShot.mp3");
                 break;
             case 10:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.woodShotGun;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","woodShotGun"));
+                this.shotAudio = new Audio("res/shotGun.mp3");
                 break;
             case 11:
                 gun = PIXI.loader.resources["res/gunData.json"].data.guns.nailGun;
                 this.sprite = new PIXI.Sprite(load.loadUnboardered("guns","nailGun"));
+                this.shotAudio = new Audio("res/gunShot.mp3");
+                break;
+            case 12:
+                gun = PIXI.loader.resources["res/gunData.json"].data.guns.laserGun;
+                this.sprite = new PIXI.Sprite(load.loadBoardered("guns","laserGun"));
+                this.shotAudio = new Audio("res/laser.mp3");
                 break;
         }
         this.sprite.pivot = new PIXI.Point(gun.handle.x,gun.handle.y);
@@ -415,11 +435,12 @@ class gun{
     shoot(){
         if(!this.reloading){
             if(this.currentLoad>0){
-                let angle = rectangle.getAngle(this.getBarrelPoistion(), new PIXI.Point(keyboard.mouseX,keyboard.mouseY));
                 while(0>= this.shotCooldown&&this.currentLoad>0){
                     for(let i = 0; i < this.bulletNum; i ++){
                         new bullet(this.getBarrelPoistion().x,this.getBarrelPoistion().y,this.getShotAngle(), this.shotCooldown, this.bulletType,this.fireSpeed,this.dammage, false);
                     }
+                    this.shotAudio.currentTime=0;
+                    this.shotAudio.play();
                     this.shotCooldown += this.fireRate;
                     this.currentLoad--;
                     this.currentRounds--;
@@ -535,8 +556,8 @@ class floorObject{
             this.dy*=Math.pow(0.9,deltaTime);
             walls.forEach(e=>{
                 if(e.intersects(new rectangle(this.sprite.x,this.sprite.y,this.sprite.width,this.sprite.height))){
-                    this.dx*=-1.1^deltaTime;
-                    this.dy*=-1.1^deltaTime;
+                    this.dx*=-1.05^deltaTime;
+                    this.dy*=-1.05^deltaTime;
                 }
             });
             this.sprite.rotation +=this.spin*deltaTime;
@@ -778,6 +799,15 @@ class animation{
                 this.img.push(load.loadUnboardered("bullets","nailExp6"));
                 this.img.push(load.loadUnboardered("bullets","nailExp7"));
                 break;
+            case 5:
+                this.img.push(load.loadUnboardered("bullets","nailExp1"));
+                this.img.push(load.loadUnboardered("bullets","nailExp2"));
+                this.img.push(load.loadUnboardered("bullets","nailExp3"));
+                this.img.push(load.loadUnboardered("bullets","nailExp4"));
+                this.img.push(load.loadUnboardered("bullets","nailExp5"));
+                this.img.push(load.loadUnboardered("bullets","nailExp6"));
+                this.img.push(load.loadUnboardered("bullets","nailExp7"));
+                break
         }
         this.frames = this.img.length;
     }

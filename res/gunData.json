@@ -182,6 +182,20 @@
             "bulletSpread": 0.01,
             "automatic": true,
             "bulletNum": 1
+        },
+        "laserGun":{
+            "fireRate": 5,
+            "fireSpeed" : 12,
+            "dammage" : 6,
+            "bulletType": 5,
+            "capacity": 3,
+            "reloadTime": 10,
+            "totalCapacity": 250,
+            "handle": {"x":18, "y":18},
+            "barrel": {"x": 46, "y": 10},
+            "bulletSpread": 0,
+            "automatic": true,
+            "bulletNum": 1
         }
     }
 }

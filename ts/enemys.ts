@@ -1,6 +1,7 @@
 import gameObject from "./gameObject";
 import {foreGroundImage, gameEngine, p1, playerBullets, currentRoom, bigHealthBar} from "./gameEngine";
 import {rectangle} from "./shapes";
+import { load } from "./main";
 
 abstract class enemy extends gameObject{
     constructor(x: number, y: number){
@@ -159,13 +160,13 @@ export class bulletMan extends walker{
                 this.friction = 0.3;
                 this.body = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
                 this.legs = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletMan.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManBack.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLeft.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManRight.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs0.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs1.png"]);
-                this.animImgs.push(PIXI.loader.resources["res/characters.json"].textures["bulletManLegs2.png"]);
+                this.animImgs.push(load.loadBoardered("characters","bulletMan"));
+                this.animImgs.push(load.loadBoardered("characters","bulletManBack"));
+                this.animImgs.push(load.loadBoardered("characters","bulletManLeft"));
+                this.animImgs.push(load.loadBoardered("characters","bulletManRight"));
+                this.animImgs.push(load.loadBoardered("characters","bulletManLegs0"));
+                this.animImgs.push(load.loadBoardered("characters","bulletManLegs1"));
+                this.animImgs.push(load.loadBoardered("characters","bulletManLegs2"));
                 this.gun = new PIXI.Sprite(PIXI.loader.resources["res/guns.json"].textures["blackPistol.png"]);
                 gunData = PIXI.loader.resources["res/gunData.json"].data.guns.blackPistol   ;
                 break;
@@ -252,35 +253,115 @@ abstract class boss extends enemy{
     }
 }
 export class potato extends boss{
-    time: number;
+    time: number = 0;
+    eventTime: number = 0;
+    endAttackTime: number = 0;
+    attackType: number = 0;
+    shadow: PIXI.Sprite;
+    z:number;
+    jumpPeriod:number=100;
+    destroyed:boolean=false;
     constructor(x: number, y: number){
         super(x,y);
         this.hp = 1000;
         this.health = new bigHealthBar(50,1000,1820,this.hp);
-        this.sprite = new PIXI.Sprite(PIXI.loader.resources["res/characters.json"].textures["potatoBoss.png"]);
+        this.sprite = new PIXI.Sprite(load.loadBoardered("characters","potatoBoss"));
+        this.shadow = new PIXI.Sprite(load.loadBoardered("characters","potatoBossShadow"));
+        this.shadow.alpha = 0.5;
+        this.shadow.anchor.y=1;
+        this.shadow.x = x;
+        this.shadow.y = y+60;
         this.sprite.x = x;
         this.sprite.y = y;
+        this.z = 0;
         this.hitbox = new rectangle(x,y, 40,60);
         this.time = 0;
+        foreGroundImage.addChild(this.shadow);
         foreGroundImage.addChild(this.sprite);
     }
     update(deltaTime: number){
+        this.time += deltaTime;
         this.hitDetect();
         this.health.setPointer(this.hp);
-        let dispersion = (Math.random()-0.5);
-        this.sprite.y = this.y;
-        this.sprite.x = this.x;
-        this.target = p1.hitbox.getCenter();
-        //gameEngine.makeBullet(this.x+17+dispersion*20,this.y+25, rectangle.getAngle(this.hitbox.getCenter(),this.target)+dispersion*0.2,0,3,5,0,true);
+        switch(this.attackType){
+            case 0:
+                while(this.time>= this.eventTime){
+                    let dispersion = Math.random()-0.5;
+                    gameEngine.makeBullet(this.x+17+dispersion*20,this.y+25, rectangle.getAngle(this.hitbox.getCenter(),this.target)+dispersion*0.2,this.eventTime-this.time,3,5,0,true)
+                    this.eventTime += 0.5;
+                }
+                this.z=0;
+                this.shadow.y = this.y+60;
+                this.sprite.x=this.x;
+                this.sprite.y=this.y;
+                break;
+            case 1:
+                if(this.eventTime<this.time){
+                    this.eventTime=this.time+this.jumpPeriod;
+                    for(let i=0; i < 64; i++){
+                        gameEngine.makeBullet(this.x+18,this.y+58,(i*Math.PI)/32,1,3,5,1,true);
+                    }
+                }
+                this.z = Math.sqrt(Math.abs(Math.min(this.eventTime-this.time,this.jumpPeriod-(this.eventTime-this.time))))*5;
+                this.shadow.x=Math.cos(Math.PI/3)*this.z+this.x;
+                this.shadow.y=-Math.sin(Math.PI/3)*this.z+this.y+60;
+                this.sprite.y=this.y-this.z;
+                this.sprite.x=this.x;
+                this.shadow.alpha = -this.z/this.jumpPeriod+0.7;
+                break;
+            case 2:
+                gameEngine.makeBullet(100,200,0,0,2,5,0,true);
+                this.sprite.y=this.y;
+                this.sprite.x=this.x;
+                break;
+        }
+        if(this.time>this.endAttackTime){
+            //this.changeState(Math.floor(Math.random()*3));
+            this.changeState(1);
+        }
+        this.hitbox = this.hitbox.translateAbsolute(this.sprite.x,this.sprite.y);
+        this.target = new PIXI.Point(0,0);//p1.hitbox.getCenter();
+    }
+    changeState(state: number){
+        switch(state){
+            case 0: //shoot masive amount of bullets from mouth
+                this.attackType =0;
+                this.eventTime = this.time;
+                this.endAttackTime = this.time+240+Math.random()*240;
+                this.sprite.texture = load.loadBoardered("characters","potatoBoss");
+                this.shadow.x=this.x;
+                this.shadow.y=this.y+60;
+                break;
+            case 1: //jump up and slam down to creat ring of bullets
+                this.attackType = 1;
+                this.eventTime = this.time+10;
+                this.endAttackTime = this.time+3030;
+                this.sprite.texture = load.loadBoardered("characters","potatoBossClosed");
+                this.shadow.x=this.x;
+                this.shadow.y=this.y+60;
+                break;
+            case 2: //drop potatos from the sky
+                this.attackType = 2;
+                this.eventTime = this.time+5;
+                this.endAttackTime = this.time+360+Math.random()*360;
+                this.sprite.texture = load.loadBoardered("characters","potatoBossClosed");
+                this.shadow.x=this.x;
+                this.shadow.y=this.y+60;
+                break;
+        }
     }
     remove(){
-        super.destroy();
-        foreGroundImage.removeChild(this.sprite);
-        currentRoom.addFloorObject(this.hitbox.getCenter().x,this.hitbox.getCenter().y,3,this.dx,this.dy);
-        this.health.remove();
-        for(let i = 0; i < 250; i++){
-            let launchRate= Math.random()*1.5;
-            currentRoom.addFloorObjectAdv(i*7+50,1000,4,Math.random()*10*launchRate-5*launchRate,Math.random()*12*launchRate-6*launchRate,Math.random()*Math.PI,Math.random()*Math.PI, 0.01, 1/launchRate+0.5);
+        if(!this.destroyed){
+            super.destroy();
+            foreGroundImage.removeChild(this.sprite);
+            foreGroundImage.removeChild(this.shadow);
+            currentRoom.addFloorObject(this.hitbox.getCenter().x,this.hitbox.getCenter().y,3,this.dx,this.dy);
+            this.health.remove();
+            for(let i = 0; i < 250; i++){
+                let launchRate= Math.random()*1.5;
+                currentRoom.addFloorObjectAdv(i*7+50,1000,4,Math.random()*10*launchRate-5*launchRate,Math.random()*12*launchRate-6*launchRate,Math.random()*Math.PI,Math.random()*Math.PI, 0.01, 1/(launchRate+0.5));
+            }
         }
+        this.destroyed = true;
     }
 }
