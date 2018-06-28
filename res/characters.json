@@ -2,7 +2,7 @@
 
 "bulletMan.png":
 {
-	"frame": {"x":44,"y":18,"w":22,"h":32},
+	"frame": {"x":22,"y":24,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
@@ -10,7 +10,7 @@
 },
 "bulletManBack.png":
 {
-	"frame": {"x":66,"y":18,"w":22,"h":32},
+	"frame": {"x":0,"y":24,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
@@ -18,7 +18,7 @@
 },
 "bulletManDead.png":
 {
-	"frame": {"x":0,"y":50,"w":31,"h":31},
+	"frame": {"x":88,"y":24,"w":31,"h":31},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":31,"h":31},
@@ -26,7 +26,7 @@
 },
 "bulletManLeft.png":
 {
-	"frame": {"x":22,"y":18,"w":22,"h":32},
+	"frame": {"x":44,"y":24,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
@@ -58,7 +58,7 @@
 },
 "bulletManRight.png":
 {
-	"frame": {"x":0,"y":18,"w":22,"h":32},
+	"frame": {"x":66,"y":24,"w":22,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":32},
@@ -82,7 +82,7 @@
 },
 "potatoBoss.png":
 {
-	"frame": {"x":31,"y":50,"w":42,"h":60},
+	"frame": {"x":29,"y":56,"w":42,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":42,"h":60},
@@ -90,7 +90,7 @@
 },
 "potatoBossClosed.png":
 {
-	"frame": {"x":73,"y":50,"w":42,"h":60},
+	"frame": {"x":71,"y":56,"w":42,"h":60},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":42,"h":60},
@@ -98,7 +98,7 @@
 },
 "potatoBossDead.png":
 {
-	"frame": {"x":51,"y":110,"w":61,"h":49},
+	"frame": {"x":51,"y":116,"w":61,"h":49},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":61,"h":49},
@@ -106,19 +106,35 @@
 },
 "potatoBossShadow.png":
 {
-	"frame": {"x":0,"y":110,"w":51,"h":53},
+	"frame": {"x":0,"y":116,"w":51,"h":53},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":53},
 	"sourceSize": {"w":51,"h":53}
+},
+"sonicR.png":
+{
+	"frame": {"x":0,"y":56,"w":29,"h":41},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":29,"h":41},
+	"sourceSize": {"w":29,"h":41}
+},
+"sonicSpin.png":
+{
+	"frame": {"x":106,"y":0,"w":22,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":24},
+	"sourceSize": {"w":22,"h":24}
 }},
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "characters.png",
 	"format": "RGBA8888",
-	"size": {"w":115,"h":163},
+	"size": {"w":128,"h":169},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:6449c5a4d7866e28c3c1f5e0d3d1b4a9:101a777d82f1de92512f5dc7db9afabf:a5fe7db4b869eb0f3e0b2940b9577ea8$"
+	"smartupdate": "$TexturePacker:SmartUpdate:d18814bc767b8af04ed76139da9810b9:54a2347062f3fbe8538ef08f27ce2f7e:a5fe7db4b869eb0f3e0b2940b9577ea8$"
 }
 }

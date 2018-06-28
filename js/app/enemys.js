@@ -27,7 +27,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
                     if (this.hp <= 0) {
                         if (!this.isDestroyed) {
                             this.dx = Math.cos(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
-                            this.dy = -Math.sin(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
+                            this.dy = Math.sin(bul.heading) * Math.sqrt(bul.speed * bul.dammage);
                             this.remove();
                             this.isDestroyed = true;
                         }
@@ -48,7 +48,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             this.time += deltaTime;
             switch (this.state) {
                 case 0:
-                    if (shapes_1.rectangle.getDistance(gameEngine_1.p1.hitbox.getCenter(), this.hitbox.getCenter()) > 300) {
+                    if (shapes_1.rectangle.lessThanDistance(gameEngine_1.p1.hitbox.getCenter(), this.hitbox.getCenter(), 300)) {
                         this.moveTo(deltaTime, shapes_1.rectangle.getAngle(this.hitbox.getCenter(), gameEngine_1.p1.hitbox.getCenter()));
                     }
                     else {
@@ -210,8 +210,8 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             super.destroy();
             gameEngine_1.foreGroundImage.removeChild(this.body);
             gameEngine_1.foreGroundImage.removeChild(this.gun);
-            gameEngine_1.currentRoom.addFloorObject(this.hitbox.getCenter().x, this.hitbox.getCenter().y, 1, this.dx, -this.dy);
-            gameEngine_1.currentRoom.addFloorObjectAdv(this.body.position.x + this.hitbox.width, this.body.position.y + 10, 2, this.dx * 2, -this.dy * 1.5, this.gun.rotation, 0.5, 0, 1);
+            gameEngine_1.currentRoom.addFloorObject(this.hitbox.getCenter().x, this.hitbox.getCenter().y, 1, this.dx, this.dy);
+            gameEngine_1.currentRoom.addFloorObjectAdv(this.body.position.x + this.hitbox.width, this.body.position.y + 10, 2, this.dx * 2, this.dy * 1.5, this.gun.rotation, 0.5, 0, 1);
         }
         incrememtLegs() {
             this.legState++;
@@ -261,6 +261,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             this.sprite.x = x;
             this.sprite.y = y;
             this.z = 0;
+            this.targetShift = 0;
             this.hitbox = new shapes_1.rectangle(x, y, 40, 60);
             this.time = 0;
             gameEngine_1.foreGroundImage.addChild(this.shadow);
@@ -270,15 +271,28 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             this.time += deltaTime;
             this.hitDetect();
             this.health.setPointer(this.hp);
+            let angle = shapes_1.rectangle.getAngle(this.hitbox.getCenter(), this.target);
             switch (this.attackType) {
                 case 0:
+                    let targetAngle = shapes_1.rectangle.getAngle(this.hitbox.getCenter(), this.target);
+                    targetAngle += this.targetShift;
+                    this.targetShift += (this.targetSwayDirection) ? 0.005 : -0.005;
+                    if (this.targetShift > 0.7) {
+                        this.targetSwayDirection = false;
+                    }
+                    if (this.targetShift < -0.7) {
+                        this.targetSwayDirection = true;
+                    }
                     while (this.time >= this.eventTime) {
                         let dispersion = Math.random() - 0.5;
-                        gameEngine_1.gameEngine.makeBullet(this.x + 17 + dispersion * 20, this.y + 25, shapes_1.rectangle.getAngle(this.hitbox.getCenter(), this.target) + dispersion * 0.2, this.eventTime - this.time, 3, 5, 0, true);
+                        gameEngine_1.gameEngine.makeBullet(this.x + 17 + dispersion * 20, this.y + 25, targetAngle + dispersion * 0.2, this.eventTime - this.time, 3, 5, 0, true);
                         this.eventTime += 0.5;
                     }
+                    this.x += Math.cos(angle) * 0.2 * deltaTime;
+                    this.y += Math.sin(angle) * 0.2 * deltaTime;
                     this.z = 0;
-                    this.shadow.y = this.y + 60;
+                    this.shadow.y = this.y + this.sprite.height;
+                    this.shadow.x = this.x;
                     this.sprite.x = this.x;
                     this.sprite.y = this.y;
                     break;
@@ -286,45 +300,63 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
                     if (this.eventTime < this.time) {
                         this.eventTime = this.time + this.jumpPeriod;
                         for (let i = 0; i < 64; i++) {
-                            gameEngine_1.gameEngine.makeBullet(this.x + 18, this.y + 58, (i * Math.PI) / 32, 1, 3, 5, 1, true);
+                            gameEngine_1.gameEngine.makeBullet(this.x + 18, this.y + 58, (i * Math.PI) / 32, 0, 3, 5, 1, true);
+                            gameEngine_1.gameEngine.makeBullet(this.x + 18, this.y + 58, (i * Math.PI) / 32, 0, 3, 2, 1, true);
                         }
                     }
+                    this.x += Math.cos(angle) * 0.15 * deltaTime * Math.sqrt(this.z);
+                    this.y += Math.sin(angle) * 0.15 * deltaTime * Math.sqrt(this.z);
                     this.z = Math.sqrt(Math.abs(Math.min(this.eventTime - this.time, this.jumpPeriod - (this.eventTime - this.time)))) * 5;
-                    this.shadow.x = Math.cos(Math.PI / 3) * this.z + this.x;
-                    this.shadow.y = -Math.sin(Math.PI / 3) * this.z + this.y + 60;
+                    this.shadow.x = gameEngine_1.lightCos * this.z + this.x;
+                    this.shadow.y = -gameEngine_1.lightSin * this.z + this.y + this.sprite.height;
                     this.sprite.y = this.y - this.z;
                     this.sprite.x = this.x;
                     this.shadow.alpha = -this.z / this.jumpPeriod + 0.7;
                     break;
                 case 2:
-                    gameEngine_1.gameEngine.makeBullet(100, 200, 0, 0, 2, 5, 0, true);
+                    while (this.eventTime < this.time) {
+                        if (Math.random() < 0.3) {
+                            let dropX = Math.pow(Math.random(), 2) * 250 - 125 + this.target.x;
+                            let dropY = Math.pow(Math.random(), 2) * 250 - 125 + this.target.y;
+                            gameEngine_1.gameEngine.makeDropBullet(dropX, dropY, 300, -5, 0, this.eventTime - this.time, 1, 0, 1, true);
+                            gameEngine_1.gameEngine.makeFloorMarker(dropX, dropY, 1, 60);
+                            this.eventTime += 5;
+                        }
+                        else {
+                            let dropX = Math.random() * 1820 + 50;
+                            let dropY = Math.random() * 980 + 50;
+                            gameEngine_1.gameEngine.makeDropBullet(dropX, dropY, 300, -5, 0, this.eventTime - this.time, 1, 0, 1, true);
+                            gameEngine_1.gameEngine.makeFloorMarker(dropX, dropY, 1, 60);
+                            this.eventTime += 5;
+                        }
+                    }
                     this.sprite.y = this.y;
                     this.sprite.x = this.x;
                     break;
             }
             if (this.time > this.endAttackTime) {
-                this.changeState(1);
+                this.changeState(Math.floor(Math.random() * 3));
             }
             this.hitbox = this.hitbox.translateAbsolute(this.sprite.x, this.sprite.y);
-            this.target = new PIXI.Point(0, 0);
+            this.target = gameEngine_1.p1.hitbox.getCenter();
         }
         changeState(state) {
             switch (state) {
                 case 0:
                     this.attackType = 0;
                     this.eventTime = this.time;
-                    this.endAttackTime = this.time + 240 + Math.random() * 240;
+                    this.endAttackTime = this.time + 600 + Math.random() * 480;
                     this.sprite.texture = main_1.load.loadBoardered("characters", "potatoBoss");
                     this.shadow.x = this.x;
                     this.shadow.y = this.y + 60;
                     break;
                 case 1:
                     this.attackType = 1;
-                    this.eventTime = this.time + 10;
-                    this.endAttackTime = this.time + 3030;
+                    this.eventTime = this.time;
+                    this.endAttackTime = this.time + 300;
                     this.sprite.texture = main_1.load.loadBoardered("characters", "potatoBossClosed");
                     this.shadow.x = this.x;
-                    this.shadow.y = this.y + 60;
+                    this.shadow.y = this.y + this.sprite.height;
                     break;
                 case 2:
                     this.attackType = 2;
@@ -332,7 +364,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
                     this.endAttackTime = this.time + 360 + Math.random() * 360;
                     this.sprite.texture = main_1.load.loadBoardered("characters", "potatoBossClosed");
                     this.shadow.x = this.x;
-                    this.shadow.y = this.y + 60;
+                    this.shadow.y = this.y + this.sprite.height;
                     break;
             }
         }

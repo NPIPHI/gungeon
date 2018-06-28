@@ -1,4 +1,3 @@
-import { Circle } from "pixi.js";
 
 
 export abstract class shape{
@@ -9,6 +8,9 @@ export abstract class shape{
     }
     static getDistance(p1: PIXI.Point, p2: PIXI.Point):number{
         return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
+    }
+    static lessThanDistance(p1: PIXI.Point, p2: PIXI.Point, dist: number):boolean{
+        return(dist*dist)<Math.pow(p1.x-p2.x,2)+Math.pow(p1.y-p2.y,2);
     }
     abstract touches(rect: rectangle):boolean;
     abstract intersects(rect: rectangle):boolean;

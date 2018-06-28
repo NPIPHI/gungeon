@@ -6,9 +6,7 @@ export default abstract class gameObject{
     constructor(){
         bufferGameObjects.push(this);
     }
-    update(deltaTime: number){
-
-    }
+    abstract update(deltaTime: number):void;
     destroy(){
         if(!this.rem){
             removeGameObjects.push(this);

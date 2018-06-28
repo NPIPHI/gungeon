@@ -1,3 +1,5 @@
+//import {controller} from "./gameEngine";
+
 
 class Keyboard {
     mouseX: number=0;
@@ -8,6 +10,10 @@ class Keyboard {
     rightToggle: boolean;
     middleDown: boolean;
     middleToggle: boolean;
+    APressed: boolean = false;
+    BPressed: boolean = false;
+    XPressed: boolean = false;
+    YPressed: boolean = false;
     map: { [keyCode: number]: boolean } = {};
     toggleMap: { [keyCode: number]: boolean } = {};
 
@@ -21,6 +27,7 @@ class Keyboard {
             if(evt.keyCode == 9){
                 evt.preventDefault();
             }
+            //console.log(evt.keyCode);
             this.map[evt.keyCode] = true;
         })
         window.addEventListener('keyup', evt => {
@@ -101,6 +108,17 @@ class Keyboard {
             this.toggleMap[i]=false;
         }
     }
+    /*contollerCheck(){
+        controller1 = controller[0];
+        let i=0;
+        controller1.buttons.forEach(but=>{
+            if(but.pressed){
+                console.log(i);
+            }
+            i++;
+        });
+    }*/
 }
+//let controller1: Gamepad;
 let kbrd = new Keyboard;
 export default kbrd;

@@ -5,6 +5,10 @@ define(["require", "exports"], function (require, exports) {
         constructor() {
             this.mouseX = 0;
             this.mouseY = 0;
+            this.APressed = false;
+            this.BPressed = false;
+            this.XPressed = false;
+            this.YPressed = false;
             this.map = {};
             this.toggleMap = {};
             window.addEventListener('keydown', evt => {

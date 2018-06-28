@@ -1,6 +1,7 @@
 import {gameEngine} from "./gameEngine";
 let app = new PIXI.Application({width: screen.width, height: screen.height});
 document.body.appendChild(app.view);
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 PIXI.loader.add("res/playerSmile.png");
 PIXI.loader.add("res/backGroundTexture.json");
 PIXI.loader.add("res/bullets.json");

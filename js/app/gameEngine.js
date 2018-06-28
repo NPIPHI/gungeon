@@ -3,6 +3,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
     Object.defineProperty(exports, "__esModule", { value: true });
     class gameEngine {
         constructor(app) {
+            exports.lightCos = Math.cos(exports.lightingAngle);
+            exports.lightSin = Math.cos(exports.lightingAngle);
             pixiApp = app;
             timeDilate = 1;
             this.mouse = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "cursor1"));
@@ -51,12 +53,10 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             exports.removeGameObjects = Array();
             animator.animate(deltaTime * timeDilate);
             if (keyboard_1.default.getKey(39)) {
-                timeDilate += 0.01;
+                timeDilate *= 1.01;
             }
             if (keyboard_1.default.getKey(37)) {
-                if (timeDilate > 0) {
-                    timeDilate -= 0.01;
-                }
+                timeDilate *= 0.99;
             }
             if (keyboard_1.default.getToggle(32)) {
                 exports.currentRoom.compress();
@@ -84,6 +84,12 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         static makeBullet(x, y, heading, backdate, typeIndex, speed, dammage, enemy) {
             new bullet(x, y, heading, backdate, typeIndex, speed, dammage, enemy);
         }
+        static makeDropBullet(x, y, z, dz, heading, backDate, type, speed, dammage, enemy) {
+            new dropBullet(x, y, z, Math.cos(heading) * speed, Math.sin(heading) * speed, dz, backDate, type, dammage, enemy);
+        }
+        static makeFloorMarker(x, y, type, length) {
+            new floorMarker(x, y, type, length);
+        }
     }
     exports.gameEngine = gameEngine;
     ;
@@ -91,27 +97,105 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         constructor(x, y) {
             super();
             this.mov = new PIXI.Point(0, 0);
+            this.direction = 0;
             this.movSpeed = 0.25;
             this.guns = Array();
-            this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage("res/playerSmile.png"));
-            this.sprite.position = new PIXI.Point(x, y);
-            this.reloadBar = new progressBar(x, y - 50, 40, 1);
+            this.animImg = new Array();
+            this.dogeActive = false;
+            this.x = x;
+            this.y = y;
+            this.dogeLength = 40;
+            this.dogeTrack = this.dogeLength;
+            this.animImg.push(main_1.load.loadBoardered("characters", "sonicR"));
+            this.animImg.push(main_1.load.loadBoardered("characters", "sonicSpin"));
+            this.invincible = false;
+            this.sprite = new PIXI.Sprite(this.animImg[0]);
+            this.sprite.position = new PIXI.Point(this.x, this.y);
+            this.reloadBar = new progressBar(this.x, this.y - 50, 40, 1);
             this.ammoCounter = new fractionCounter(screen.width - 50, screen.height - 50, 0, 0, true);
             for (let i = 0; i < 12; i++) {
                 this.guns.push(new gun(i + 1));
             }
             this.guns[0].switchGunIn(this.ammoCounter, this.reloadBar);
             this.currentGun = 0;
-            this.hitbox = new shapes_1.rectangle(x, y, this.sprite.width, this.sprite.height);
+            this.hitbox = new shapes_1.rectangle(this.x, this.y, this.sprite.width, this.sprite.height);
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
+            this.dogeHandle(deltaTime);
             this.calcMov();
-            this.sprite.position.x += this.mov.x * deltaTime;
-            this.sprite.position.y += this.mov.y * deltaTime;
-            this.hitbox = this.hitbox.translateAbsolute(this.sprite.position.x, this.sprite.position.y);
+            this.x += this.mov.x * deltaTime;
+            this.y += this.mov.y * deltaTime;
+            this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
+            this.sprite.x = this.x;
+            this.sprite.y = this.y;
             this.collision(deltaTime);
+            if (!this.invincible) {
+                this.bulletCollision();
+            }
             this.mov.set(0, 0);
+            this.gunHandle(deltaTime);
+        }
+        dogeHandle(deltaTime) {
+            if (this.dogeTrack >= this.dogeLength) {
+                if (this.dogeActive) {
+                    this.endDoge();
+                }
+                if (keyboard_1.default.getToggle(32)) {
+                    this.doge();
+                }
+            }
+            else {
+                this.dogeTrack += deltaTime;
+                if (this.dogeTrack < 25) {
+                    this.mov.x += Math.cos(this.direction) * 5;
+                    this.mov.y += Math.sin(this.direction) * 5;
+                }
+                else {
+                    this.invincible = false;
+                    this.mov.x += Math.cos(this.direction) * (this.dogeLength - this.dogeTrack) / 3, 0 * deltaTime;
+                    this.mov.y += Math.sin(this.direction) * (this.dogeLength - this.dogeTrack) / 3, 0 * deltaTime;
+                }
+            }
+        }
+        doge() {
+            this.dogeTrack = 0;
+            this.sprite.texture = this.animImg[1];
+            this.dogeActive = true;
+            this.invincible = true;
+        }
+        endDoge() {
+            this.dogeTrack = this.dogeLength;
+            this.sprite.texture = this.animImg[0];
+            this.dogeActive = false;
+        }
+        calcMov() {
+            if (!this.dogeActive) {
+                if (keyboard_1.default.getKey(87)) {
+                    this.mov.y -= 2;
+                }
+                if (keyboard_1.default.getKey(65)) {
+                    this.mov.x += -2;
+                }
+                if (keyboard_1.default.getKey(83)) {
+                    this.mov.y += 2;
+                }
+                if (keyboard_1.default.getKey(68)) {
+                    this.mov.x += 2;
+                }
+                this.direction = Math.atan2(this.mov.y, this.mov.x);
+            }
+        }
+        bulletCollision() {
+            if (!this.invincible) {
+                exports.enemyBullets.forEach(bul => {
+                    if (bul.hitbox.intersects(this.hitbox)) {
+                        this.y -= 15;
+                    }
+                });
+            }
+        }
+        gunHandle(deltaTime) {
             if (this.guns[this.currentGun].automatic) {
                 if (keyboard_1.default.getMouse(1)) {
                     this.guns[this.currentGun].shoot();
@@ -144,20 +228,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 this.guns[this.currentGun].switchGunIn(this.ammoCounter, this.reloadBar);
             }
             this.guns[this.currentGun].update(deltaTime);
-        }
-        calcMov() {
-            if (keyboard_1.default.getKey(87)) {
-                this.mov.y -= 2;
-            }
-            if (keyboard_1.default.getKey(65)) {
-                this.mov.x += -2;
-            }
-            if (keyboard_1.default.getKey(83)) {
-                this.mov.y += 2;
-            }
-            if (keyboard_1.default.getKey(68)) {
-                this.mov.x += 2;
-            }
         }
         collision(deltaTime) {
             let collisionRects = new Array();
@@ -203,6 +273,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             super();
             this.isDestroyed = false;
             this.sprite = new PIXI.Sprite(this.getBulletType(typeIndex));
+            if (this.type == 0) {
+                this.sprite.alpha = 0;
+            }
             this.sprite.x = x - this.sprite.width / 2;
             this.sprite.y = y - this.sprite.height / 2;
             this.x = x;
@@ -242,7 +315,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         destroy() {
             if (!this.isDestroyed) {
                 super.destroy();
-                animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y, this.type, this.heading);
+                if (this.type) {
+                    animator.makeAnimation(this.hitbox.getCenter().x, this.hitbox.getCenter().y, this.type, this.heading);
+                }
                 exports.midGroundImage.removeChild(this.sprite);
                 if (this.enemy) {
                     exports.enemyBullets.splice(exports.enemyBullets.indexOf(this), 1);
@@ -255,6 +330,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
         getBulletType(index) {
             switch (index) {
+                case 0:
+                    return PIXI.Texture.WHITE;
                 case 1:
                     return main_1.load.loadUnboardered("bullets", "smallYellow");
                 case 2:
@@ -265,8 +342,101 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     return main_1.load.loadUnboardered("bullets", "nail");
                 case 5:
                     return main_1.load.loadBoardered("bullets", "laser");
+                case 6:
+                    return main_1.load.loadBoardered("bullets", "potato");
             }
             return PIXI.Texture.WHITE;
+        }
+        setBounds(newHitbox) {
+            this.hitbox = newHitbox;
+        }
+    }
+    class dropBullet extends gameObject_1.default {
+        constructor(x, y, z, dx, dy, dz, backdate, type, dammage, enemy) {
+            super();
+            if (this.dz > 0) {
+                throw "dzMustBeNegative";
+            }
+            this.z = z;
+            this.dz = dz;
+            this.sprite = new PIXI.Sprite(this.getBulletType(type));
+            this.x = x - this.sprite.width / 2;
+            this.y = y - this.sprite.width / 2;
+            this.shadow.anchor.y = 1;
+            this.shadow.x = exports.lightCos * this.z + this.x;
+            this.shadow.y = exports.lightSin * this.z + this.y + this.sprite.height;
+            this.sprite.x = x - this.sprite.width / 2;
+            this.sprite.y = y - this.sprite.height / 2;
+            this.dx = dx;
+            this.dy = dy;
+            this.backdate(backdate);
+            this.dammage = dammage;
+            this.type = type;
+            this.enemy = enemy;
+            this.shadow.alpha = 0;
+            exports.midGroundImage.addChild(this.shadow);
+            exports.foreGroundImage.addChild(this.sprite);
+        }
+        backdate(backDate) {
+            this.x += this.dx * backDate;
+            this.y += this.dy * backDate;
+            this.z + this.dz * backDate;
+        }
+        getBulletType(type) {
+            switch (type) {
+                case 0:
+                    this.shadow = new PIXI.Sprite(PIXI.Texture.WHITE);
+                    return PIXI.Texture.WHITE;
+                case 1:
+                    this.shadow = new PIXI.Sprite(main_1.load.loadBoardered("bullets", "potatoShadow"));
+                    return main_1.load.loadBoardered("bullets", "potato");
+            }
+        }
+        update(deltaTime) {
+            if (this.z < 0) {
+                new explosion(this.x, this.y, this.type, this.dammage, this.enemy);
+                this.destroy();
+            }
+            this.x += this.dx * deltaTime;
+            this.y += this.dy * deltaTime;
+            this.z += this.dz * deltaTime;
+            this.sprite.x = this.x;
+            this.sprite.y = this.y - this.z;
+            this.shadow.x = exports.lightCos * this.z + this.x;
+            this.shadow.y = -exports.lightSin * this.z + this.y + this.sprite.height;
+            this.shadow.alpha = Math.max(0, Math.min(0.7, -(this.z / 300) + 0.7));
+        }
+        destroy() {
+            super.destroy();
+            if (this.type == 1) {
+                exports.currentRoom.addFloorObjectAdv(this.x + this.sprite.width / 2, this.y + this.sprite.width / 2, 5, 0, 0, 0, 0, 0.05, 1);
+            }
+            exports.foreGroundImage.removeChild(this.sprite);
+            exports.midGroundImage.removeChild(this.shadow);
+        }
+    }
+    class explosion extends bullet {
+        constructor(x, y, type, dammage, enemy) {
+            super(x, y, 0, 0, explosion.getExpType(type), 0, dammage, enemy);
+            this.allowDestroy = false;
+            if (type == 1) {
+                super.setBounds(new shapes_1.rectangle(this.x, this.y, 50, 50));
+            }
+        }
+        update() {
+            this.allowDestroy = true;
+            this.destroy();
+        }
+        destroy() {
+            if (this.allowDestroy) {
+                super.destroy();
+            }
+        }
+        static getExpType(type) {
+            switch (type) {
+                case 1:
+                    return 0;
+            }
         }
     }
     class gun {
@@ -515,8 +685,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 this.dy *= Math.pow(0.9, deltaTime);
                 walls.forEach(e => {
                     if (e.intersects(new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height))) {
-                        this.dx *= -1.05 ^ deltaTime;
-                        this.dy *= -1.05 ^ deltaTime;
+                        this.dx *= -1.1;
+                        this.dy *= -1.1;
                     }
                 });
                 this.sprite.rotation += this.spin * deltaTime;
@@ -544,6 +714,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 case 4:
                     this.sprite = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "glassShard"));
                     break;
+                case 5:
+                    this.sprite = new PIXI.Sprite(main_1.load.loadBoardered("bullets", "potatoExp1"));
+                    break;
             }
         }
         compress() {
@@ -559,6 +732,68 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         remove() {
             exports.midGroundImage.removeChild(this.sprite);
             this.owner.floorObjects.splice(this.owner.floorObjects.indexOf(this), 1);
+        }
+    }
+    class floorMarker extends gameObject_1.default {
+        constructor(x, y, type, length) {
+            super();
+            this.time = 0;
+            this.x = x;
+            this.y = y;
+            this.length = length;
+            this.getSprite(type);
+            this.circle.x = this.x - Math.ceil(this.circle.width / 2);
+            this.circle.y = this.y - Math.ceil(this.circle.height / 2);
+            this.leftMark.x = this.x - 35;
+            this.leftMark.y = this.y - 3;
+            this.rightMark.x = this.x + 23;
+            this.rightMark.y = this.y - 3;
+            this.topMark.x = this.x - 3;
+            this.topMark.y = this.y - 35;
+            this.bottomMark.x = this.x - 3;
+            this.bottomMark.y = this.y + 23;
+            exports.midGroundImage.addChild(this.circle);
+            exports.midGroundImage.addChild(this.leftMark);
+            exports.midGroundImage.addChild(this.rightMark);
+            exports.midGroundImage.addChild(this.topMark);
+            exports.midGroundImage.addChild(this.bottomMark);
+        }
+        getSprite(type) {
+            switch (type) {
+                case 0:
+                    this.circle = new PIXI.Sprite(PIXI.Texture.WHITE);
+                    this.leftMark = new PIXI.Sprite(PIXI.Texture.WHITE);
+                    this.rightMark = new PIXI.Sprite(PIXI.Texture.WHITE);
+                    this.topMark = new PIXI.Sprite(PIXI.Texture.WHITE);
+                    this.bottomMark = new PIXI.Sprite(PIXI.Texture.WHITE);
+                    break;
+                case 1:
+                    this.circle = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "redTarget"));
+                    this.leftMark = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "redMarkerHorizontal"));
+                    this.rightMark = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "redMarkerHorizontal"));
+                    this.topMark = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "redMarkerVerticle"));
+                    this.bottomMark = new PIXI.Sprite(main_1.load.loadBoardered("UIElements", "redMarkerVerticle"));
+                    break;
+            }
+        }
+        update(deltaTime) {
+            this.time += deltaTime;
+            if (this.time > this.length) {
+                this.destroy();
+            }
+            let offset = Math.floor((this.time / this.length) * 23);
+            this.leftMark.x = this.x - 35 + offset;
+            this.rightMark.x = this.x + 23 - offset;
+            this.topMark.y = this.y - 35 + offset;
+            this.bottomMark.y = this.y + 23 - offset;
+        }
+        destroy() {
+            super.destroy();
+            exports.midGroundImage.removeChild(this.circle);
+            exports.midGroundImage.removeChild(this.leftMark);
+            exports.midGroundImage.removeChild(this.rightMark);
+            exports.midGroundImage.removeChild(this.topMark);
+            exports.midGroundImage.removeChild(this.bottomMark);
         }
     }
     class room {
@@ -714,6 +949,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
         getAnimFrames(type) {
             switch (type) {
+                case 0:
+                    this.img.push(PIXI.Texture.WHITE);
+                    break;
                 case 1:
                     this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp1"));
                     this.img.push(main_1.load.loadUnboardered("bullets", "smallYellowExp2"));
@@ -1035,6 +1273,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
     exports.foreGroundImage = new PIXI.Container();
     exports.midGroundImage = new PIXI.Container();
     exports.lighting = new PIXI.particles.ParticleContainer();
+    exports.lightingAngle = Math.PI / 3;
     let UIImage = new PIXI.Container();
     let walls = new Array();
     let animator = new animationHandeler();

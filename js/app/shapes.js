@@ -10,6 +10,9 @@ define(["require", "exports"], function (require, exports) {
         static getDistance(p1, p2) {
             return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
         }
+        static lessThanDistance(p1, p2, dist) {
+            return (dist * dist) < Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
+        }
     }
     exports.shape = shape;
     class rectangle extends shape {
