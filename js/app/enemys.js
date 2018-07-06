@@ -19,7 +19,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
         }
         hitDetect() {
             gameEngine_1.playerBullets.forEach(bul => {
-                if (bul.hitbox.touches(this.hitbox)) {
+                if (bul.hitbox.intersect(this.hitbox)) {
                     bul.destroy();
                     this.hp -= bul.dammage;
                     this.dx += Math.cos(bul.heading) * 0.1 * (bul.speed * bul.dammage);
@@ -69,8 +69,8 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
                         this.changeState(0);
                     }
             }
-            if (this.y + this.x - gameEngine_1.p1.hitbox.x > gameEngine_1.p1.hitbox.y) {
-                if (this.y - this.x + gameEngine_1.p1.hitbox.x > gameEngine_1.p1.hitbox.y) {
+            if (this.y + this.x - gameEngine_1.p1.hitbox.getX() > gameEngine_1.p1.hitbox.getY()) {
+                if (this.y - this.x + gameEngine_1.p1.hitbox.getX() > gameEngine_1.p1.hitbox.getY()) {
                     this.body.texture = this.animImgs[1];
                 }
                 else {
@@ -78,7 +78,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
                 }
             }
             else {
-                if (this.y - this.x + gameEngine_1.p1.hitbox.x > gameEngine_1.p1.hitbox.y) {
+                if (this.y - this.x + gameEngine_1.p1.hitbox.getX() > gameEngine_1.p1.hitbox.getY()) {
                     this.body.texture = this.animImgs[3];
                 }
                 else {
@@ -162,23 +162,23 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             this.body.position.x = this.x;
             this.body.position.y = this.y;
             this.legs.position.y = this.body.height;
-            this.hitbox = new shapes_1.rectangle(this.x, this.y, this.body.width, this.body.height + this.legs.height);
+            this.hitbox = new shapes_1.rectangle(this.x, this.y, this.body.width, this.body.height + this.legs.height, 0);
         }
         shoot() {
             let posit = this.getBarrelPoistion();
             gameEngine_1.gameEngine.makeBullet(posit.x, posit.y, shapes_1.rectangle.getAngle(posit, this.target), 0, 3, 4, 1, true);
         }
         calcGunPosition() {
-            if (this.hitbox.getCenter().x < gameEngine_1.p1.hitbox.x) {
+            if (this.hitbox.getCenter().x < gameEngine_1.p1.hitbox.getX()) {
                 if (this.hitbox.getCenter().y < this.target.y) {
                     this.gun.scale.x = 1;
-                    this.gun.x = this.hitbox.x + this.hitbox.width;
+                    this.gun.x = this.hitbox.getX() + this.hitbox.getWidth();
                     this.gun.y = this.hitbox.getCenter().y;
                     this.gun.rotation = shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
                 }
                 else {
                     this.gun.scale.x = -1;
-                    this.gun.x = this.hitbox.x + this.hitbox.width;
+                    this.gun.x = this.hitbox.getX() + this.hitbox.getWidth();
                     this.gun.y = this.hitbox.getCenter().y;
                     this.gun.rotation = Math.PI + shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
                 }
@@ -186,13 +186,13 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             else {
                 if (this.hitbox.getCenter().y < this.target.y) {
                     this.gun.scale.x = -1;
-                    this.gun.x = this.hitbox.x;
+                    this.gun.x = this.hitbox.getX();
                     this.gun.y = this.hitbox.getCenter().y;
                     this.gun.rotation = Math.PI + shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
                 }
                 else {
                     this.gun.scale.x = 1;
-                    this.gun.x = this.hitbox.x;
+                    this.gun.x = this.hitbox.getX();
                     this.gun.y = this.hitbox.getCenter().y;
                     this.gun.rotation = shapes_1.rectangle.getAngle(this.gun.getGlobalPosition(), this.target);
                 }
@@ -211,7 +211,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             gameEngine_1.foreGroundImage.removeChild(this.body);
             gameEngine_1.foreGroundImage.removeChild(this.gun);
             gameEngine_1.currentRoom.addFloorObject(this.hitbox.getCenter().x, this.hitbox.getCenter().y, 1, this.dx, this.dy);
-            gameEngine_1.currentRoom.addFloorObjectAdv(this.body.position.x + this.hitbox.width, this.body.position.y + 10, 2, this.dx * 2, this.dy * 1.5, this.gun.rotation, 0.5, 0, 1);
+            gameEngine_1.currentRoom.addFloorObjectAdv(this.body.position.x + this.hitbox.getWidth(), this.body.position.y + 10, 2, this.dx * 2, this.dy * 1.5, this.gun.rotation, 0.5, 0, 1);
         }
         incrememtLegs() {
             this.legState++;
@@ -262,7 +262,7 @@ define(["require", "exports", "./gameObject", "./gameEngine", "./shapes", "./mai
             this.sprite.y = y;
             this.z = 0;
             this.targetShift = 0;
-            this.hitbox = new shapes_1.rectangle(x, y, 40, 60);
+            this.hitbox = new shapes_1.rectangle(x, y, 40, 60, 0);
             this.time = 0;
             gameEngine_1.foreGroundImage.addChild(this.shadow);
             gameEngine_1.foreGroundImage.addChild(this.sprite);
