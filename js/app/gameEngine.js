@@ -60,12 +60,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             if (keyboard_1.default.getKey(37)) {
                 timeDilate *= 0.99;
             }
-            if (keyboard_1.default.getToggle(32)) {
-                exports.currentRoom.compress();
-            }
-            if (keyboard_1.default.getToggle(76)) {
-                exports.currentRoom.uncompress();
-            }
             keyboard_1.default.resetToggle();
         }
         generateFloor() {
@@ -129,9 +123,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.x += this.mov.x * deltaTime;
             this.y += this.mov.y * deltaTime;
             this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
+            this.collision();
             this.sprite.x = this.x;
             this.sprite.y = this.y;
-            this.collision(deltaTime);
             if (!this.invincible) {
                 this.bulletCollision();
             }
@@ -232,37 +226,31 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             }
             this.guns[this.currentGun].update(deltaTime);
         }
-        collision(deltaTime) {
-            let collisionRects = new Array();
+        collision() {
+            let collisionRects = [];
             walls.forEach(r => {
                 if (r.intersect(this.hitbox)) {
                     collisionRects.push(r);
                 }
             });
-            collisionRects.forEach(r => {
-                if (this.mov.x * deltaTime > 0) {
-                    if ((this.x + this.hitbox.getWidth()) - r.x < this.mov.x * 2 * deltaTime && !(r.y + this.mov.y * deltaTime >= this.y + this.hitbox.getWidth() || r.y + r.height - this.mov.y * deltaTime <= this.y)) {
-                        this.x = -this.hitbox.getWidth() + r.x;
-                        this.mov.set(0, this.mov.y);
-                    }
+            collisionRects.forEach(rect => {
+                let bot, top, left, right;
+                bot = this.y - (rect.getY() + rect.getHeight());
+                top = rect.getY() - (this.y + this.hitbox.getHeight());
+                left = rect.getX() - (this.x + this.hitbox.getWidth());
+                right = this.x - (rect.getX() + rect.getWidth());
+                let penetrate = Math.max(bot, top, left, right);
+                if (bot == penetrate) {
+                    this.y -= bot;
                 }
-                if (this.mov.x * deltaTime < 0) {
-                    if ((r.x + r.width) - this.x < -this.mov.x * 2 * deltaTime && !(r.y + this.mov.y * deltaTime >= this.y + this.hitbox.getWidth() || r.y + r.height - this.mov.y * deltaTime <= this.y)) {
-                        this.x = r.x + r.width;
-                        this.mov.set(0, this.mov.y);
-                    }
+                if (top == penetrate) {
+                    this.y += top;
                 }
-                if (this.mov.y * deltaTime > 0) {
-                    if ((this.y + this.hitbox.getWidth()) - r.y <= this.mov.y * 2 * deltaTime && !(r.x >= this.x + this.hitbox.getWidth() || r.x + r.width <= this.x)) {
-                        this.y = -this.hitbox.getWidth() + r.y;
-                        this.mov.set(this.mov.x, 0);
-                    }
+                if (left == penetrate) {
+                    this.x += penetrate;
                 }
-                if (this.mov.y * deltaTime < 0) {
-                    if ((r.y + r.height) - this.y < -this.mov.y * 2 * deltaTime && !(r.x >= this.x + this.hitbox.getWidth() || r.x + r.width <= this.x)) {
-                        this.y = r.y + r.getWidth();
-                        this.mov.set(this.mov.x, 0);
-                    }
+                if (right == penetrate) {
+                    this.x -= penetrate;
                 }
             });
         }
@@ -283,7 +271,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.sprite.y = y - this.sprite.height / 2;
             this.x = x;
             this.y = y;
-            this.hitbox = new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height, 0);
+            this.hitbox = new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height, heading);
             this.heading = heading;
             this.dammage = dammage;
             this.speed = speed;

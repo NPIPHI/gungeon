@@ -83,17 +83,20 @@ define(["require", "exports"], function (require, exports) {
         }
         getEdgePts(axis) {
             let axDif = axis - this.rotation;
-            if (axDif >= PI + PI2) {
-                return [this.verts[3], this.verts[1]];
+            while (axDif < 0) {
+                axDif += PI * 2;
             }
-            if (axDif < PI2) {
+            if (axDif >= PI + PI2) {
                 return [this.verts[0], this.verts[2]];
             }
+            if (axDif < PI2) {
+                return [this.verts[3], this.verts[1]];
+            }
             if (axDif < PI && axDif >= PI2) {
-                return [this.verts[1], this.verts[3]];
+                return [this.verts[2], this.verts[0]];
             }
             if (axDif < PI + PI2 && axDif >= PI) {
-                return [this.verts[2], this.verts[0]];
+                return [this.verts[1], this.verts[3]];
             }
         }
         getAxisEnds(axis) {
