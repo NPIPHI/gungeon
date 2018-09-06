@@ -1,6 +1,6 @@
 import gameObject from "./gameObject";
 import {foreGroundImage, gameEngine, p1, playerBullets, currentRoom, bigHealthBar, lightCos, lightSin} from "./gameEngine";
-import {rectangle, shape} from "./shapes";
+import {rectangle} from "./shapes";
 import { load } from "./main";
 
 abstract class enemy extends gameObject{
@@ -12,7 +12,7 @@ abstract class enemy extends gameObject{
     }
     hitDetect(){
         playerBullets.forEach(bul=>{
-            if(bul.hitbox.intersect(this.hitbox)){
+            if(bul.hitbox.touches(this.hitbox)){
                 bul.destroy();
                 this.hp-=bul.dammage;
                 this.dx += Math.cos(bul.heading)*0.1*(bul.speed*bul.dammage);
@@ -36,7 +36,7 @@ abstract class enemy extends gameObject{
     x: number=0;
     y: number=0;
     time: number=0;
-    hitbox: shape;
+    hitbox: rectangle;
     target: PIXI.Point;
     maxHp: number=0;
     isDestroyed: boolean = false;
@@ -81,14 +81,14 @@ abstract class walker extends enemy{
                     this.changeState(0);
                 }
         }
-        if(this.y+this.x-p1.hitbox.getX()>p1.hitbox.getY()){//lower than slope of one
-            if(this.y-this.x+p1.hitbox.getX()>p1.hitbox.getY()){
+        if(this.y+this.x-p1.hitbox.x>p1.hitbox.y){//lower than slope of one
+            if(this.y-this.x+p1.hitbox.x>p1.hitbox.y){
                 this.body.texture=this.animImgs[1];
             } else {
                 this.body.texture=this.animImgs[2];
             }
         } else {
-            if(this.y-this.x+p1.hitbox.getX()>p1.hitbox.getY()){
+            if(this.y-this.x+p1.hitbox.x>p1.hitbox.y){
                 this.body.texture=this.animImgs[3];
             } else {
                 this.body.texture=this.animImgs[0];
@@ -178,34 +178,34 @@ export class bulletMan extends walker{
         this.body.position.x = this.x;
         this.body.position.y = this.y;
         this.legs.position.y = this.body.height;
-        this.hitbox = new rectangle(this.x,this.y,this.body.width,this.body.height+this.legs.height,0);
+        this.hitbox = new rectangle(this.x,this.y,this.body.width,this.body.height+this.legs.height);
     }
     shoot():void{
         let posit: PIXI.Point = this.getBarrelPoistion();
         gameEngine.makeBullet(posit.x, posit.y, rectangle.getAngle(posit, this.target),0,3,4,1,true);
     }
     calcGunPosition(){
-        if(this.hitbox.getCenter().x<p1.hitbox.getX()){//right
+        if(this.hitbox.getCenter().x<p1.hitbox.x){//right
             if(this.hitbox.getCenter().y<this.target.y){//bottom
                 this.gun.scale.x=1;
-                this.gun.x = this.hitbox.getX()+this.hitbox.getWidth();
+                this.gun.x = this.hitbox.x+this.hitbox.width;
                 this.gun.y = this.hitbox.getCenter().y;
                 this.gun.rotation = rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
             } else {
                 this.gun.scale.x=-1;
-                this.gun.x = this.hitbox.getX()+this.hitbox.getWidth();
+                this.gun.x = this.hitbox.x+this.hitbox.width;
                 this.gun.y = this.hitbox.getCenter().y;
                 this.gun.rotation = Math.PI+rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
             }
         } else{//left
             if(this.hitbox.getCenter().y<this.target.y){
                 this.gun.scale.x = -1;
-                this.gun.x = this.hitbox.getX();
+                this.gun.x = this.hitbox.x;
                 this.gun.y = this.hitbox.getCenter().y;
                 this.gun.rotation = Math.PI+rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
             } else {
                 this.gun.scale.x=1;
-                this.gun.x = this.hitbox.getX();
+                this.gun.x = this.hitbox.x;
                 this.gun.y = this.hitbox.getCenter().y;
                 this.gun.rotation = rectangle.getAngle(this.gun.getGlobalPosition(),this.target);
             }
@@ -223,7 +223,7 @@ export class bulletMan extends walker{
         foreGroundImage.removeChild(this.body);
         foreGroundImage.removeChild(this.gun);
         currentRoom.addFloorObject(this.hitbox.getCenter().x,this.hitbox.getCenter().y,1,this.dx,this.dy);
-        currentRoom.addFloorObjectAdv(this.body.position.x+this.hitbox.getWidth(), this.body.position.y+10, 2, this.dx*2,this.dy*1.5,this.gun.rotation,0.5,0,1);
+        currentRoom.addFloorObjectAdv(this.body.position.x+this.hitbox.width, this.body.position.y+10, 2, this.dx*2,this.dy*1.5,this.gun.rotation,0.5,0,1);
     }
     incrememtLegs(){
         this.legState++;
@@ -277,7 +277,7 @@ export class potato extends boss{
         this.sprite.y = y;
         this.z = 0;
         this.targetShift = 0;
-        this.hitbox = new rectangle(x,y, 40,60,0);
+        this.hitbox = new rectangle(x,y, 40,60);
         this.time = 0;
         foreGroundImage.addChild(this.shadow);
         foreGroundImage.addChild(this.sprite);

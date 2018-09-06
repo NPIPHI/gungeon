@@ -3,8 +3,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
     Object.defineProperty(exports, "__esModule", { value: true });
     class gameEngine {
         constructor(app) {
-            let rectan = new shapes_1.rectangle(0, 0, 100, 50, 0);
-            console.log(rectan.intersect(new shapes_1.rectangle(0, 0, 50, 50, 0)));
             exports.lightCos = Math.cos(exports.lightingAngle);
             exports.lightSin = Math.cos(exports.lightingAngle);
             pixiApp = app;
@@ -17,7 +15,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             pixiApp.stage.addChild(UIImage);
             UIImage.addChild(this.mouse);
             this.generateFloor();
-            exports.currentRoom = new room(new shapes_1.rectangle(0, 0, 0, 0, 0));
+            exports.currentRoom = new room(new shapes_1.rectangle(0, 0, 0, 0));
             this.makePlayer(100, 100);
             new enemys_1.potato(500, 500);
             new enemys_1.bulletMan(Math.random() * 1800 + 50, Math.random() * 1000 + 50, 1);
@@ -104,9 +102,9 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.guns = Array();
             this.animImg = new Array();
             this.dogeActive = false;
-            this.dogeLength = 30;
             this.x = x;
             this.y = y;
+            this.dogeLength = 40;
             this.dogeTrack = this.dogeLength;
             this.animImg.push(main_1.load.loadBoardered("characters", "sonicR"));
             this.animImg.push(main_1.load.loadBoardered("characters", "sonicSpin"));
@@ -115,12 +113,12 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.sprite.position = new PIXI.Point(this.x, this.y);
             this.reloadBar = new progressBar(this.x, this.y - 50, 40, 1);
             this.ammoCounter = new fractionCounter(screen.width - 50, screen.height - 50, 0, 0, true);
-            for (let i = 0; i < 13; i++) {
+            for (let i = 0; i < 12; i++) {
                 this.guns.push(new gun(i + 1));
             }
             this.guns[0].switchGunIn(this.ammoCounter, this.reloadBar);
             this.currentGun = 0;
-            this.hitbox = new shapes_1.rectangle(this.x, this.y, this.sprite.width, this.sprite.height, 0);
+            this.hitbox = new shapes_1.rectangle(this.x, this.y, this.sprite.width, this.sprite.height);
             exports.foreGroundImage.addChild(this.sprite);
         }
         update(deltaTime) {
@@ -135,8 +133,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             if (!this.invincible) {
                 this.bulletCollision();
             }
-            this.gunHandle(deltaTime);
             this.mov.set(0, 0);
+            this.gunHandle(deltaTime);
         }
         dogeHandle(deltaTime) {
             if (this.dogeTrack >= this.dogeLength) {
@@ -191,9 +189,8 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         bulletCollision() {
             if (!this.invincible) {
                 exports.enemyBullets.forEach(bul => {
-                    if (bul.hitbox.intersect(this.hitbox)) {
-                        animator.makeAnimation(20, 20, 6, 0);
-                        bul.destroy();
+                    if (bul.hitbox.intersects(this.hitbox)) {
+                        this.y -= 15;
                     }
                 });
             }
@@ -235,32 +232,32 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         collision(deltaTime) {
             let collisionRects = new Array();
             walls.forEach(r => {
-                if (r.intersect(this.hitbox)) {
+                if (r.touches(this.hitbox)) {
                     collisionRects.push(r);
                 }
             });
             collisionRects.forEach(r => {
                 if (this.mov.x * deltaTime > 0) {
-                    if ((this.x + this.hitbox.getWidth()) - r.x < this.mov.x * 2 * deltaTime && !(r.y + this.mov.y * deltaTime >= this.y + this.hitbox.getWidth() || r.y + r.height - this.mov.y * deltaTime <= this.y)) {
-                        this.x = -this.hitbox.getWidth() + r.x;
+                    if ((this.sprite.position.x + this.hitbox.width) - r.x < this.mov.x * 2 * deltaTime && !(r.y + this.mov.y * deltaTime >= this.sprite.position.y + this.hitbox.height || r.y + r.height - this.mov.y * deltaTime <= this.sprite.position.y)) {
+                        this.sprite.position.x = -this.hitbox.width + r.x;
                         this.mov.set(0, this.mov.y);
                     }
                 }
                 if (this.mov.x * deltaTime < 0) {
-                    if ((r.x + r.width) - this.x < -this.mov.x * 2 * deltaTime && !(r.y + this.mov.y * deltaTime >= this.y + this.hitbox.getWidth() || r.y + r.height - this.mov.y * deltaTime <= this.y)) {
-                        this.x = r.x + r.width;
+                    if ((r.x + r.width) - this.sprite.position.x < -this.mov.x * 2 * deltaTime && !(r.y + this.mov.y * deltaTime >= this.sprite.position.y + this.hitbox.height || r.y + r.height - this.mov.y * deltaTime <= this.sprite.position.y)) {
+                        this.sprite.position.x = r.x + r.width;
                         this.mov.set(0, this.mov.y);
                     }
                 }
                 if (this.mov.y * deltaTime > 0) {
-                    if ((this.y + this.hitbox.getWidth()) - r.y <= this.mov.y * 2 * deltaTime && !(r.x >= this.x + this.hitbox.getWidth() || r.x + r.width <= this.x)) {
-                        this.y = -this.hitbox.getWidth() + r.y;
+                    if ((this.sprite.position.y + this.hitbox.height) - r.y <= this.mov.y * 2 * deltaTime && !(r.x >= this.sprite.position.x + this.hitbox.width || r.x + r.width <= this.sprite.position.x)) {
+                        this.sprite.position.y = -this.hitbox.height + r.y;
                         this.mov.set(this.mov.x, 0);
                     }
                 }
                 if (this.mov.y * deltaTime < 0) {
-                    if ((r.y + r.height) - this.y < -this.mov.y * 2 * deltaTime && !(r.x >= this.x + this.hitbox.getWidth() || r.x + r.width <= this.x)) {
-                        this.y = r.y + r.getWidth();
+                    if ((r.y + r.height) - this.sprite.position.y < -this.mov.y * 2 * deltaTime && !(r.x >= this.sprite.position.x + this.hitbox.width || r.x + r.width <= this.sprite.position.x)) {
+                        this.sprite.position.y = r.y + r.height;
                         this.mov.set(this.mov.x, 0);
                     }
                 }
@@ -283,7 +280,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.sprite.y = y - this.sprite.height / 2;
             this.x = x;
             this.y = y;
-            this.hitbox = new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height, 0);
+            this.hitbox = new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height);
             this.heading = heading;
             this.dammage = dammage;
             this.speed = speed;
@@ -303,7 +300,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.sprite.y = this.y + this.sprite.height / 2;
             this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
             walls.forEach(r => {
-                if (this.hitbox.intersect(r)) {
+                if (this.hitbox.intersects(r)) {
                     this.destroy();
                 }
             });
@@ -347,8 +344,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     return main_1.load.loadBoardered("bullets", "laser");
                 case 6:
                     return main_1.load.loadBoardered("bullets", "potato");
-                case 7:
-                    return main_1.load.loadBoardered("bullets", "water");
             }
             return PIXI.Texture.WHITE;
         }
@@ -425,7 +420,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             super(x, y, 0, 0, explosion.getExpType(type), 0, dammage, enemy);
             this.allowDestroy = false;
             if (type == 1) {
-                super.setBounds(new shapes_1.rectangle(this.x, this.y, 50, 50, 0));
+                super.setBounds(new shapes_1.rectangle(this.x, this.y, 50, 50));
             }
         }
         update() {
@@ -517,11 +512,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     this.sprite = new PIXI.Sprite(main_1.load.loadBoardered("guns", "laserGun"));
                     this.shotAudio = new Audio("res/laser.mp3");
                     break;
-                case 13:
-                    gun = PIXI.loader.resources["res/gunData.json"].data.guns.waterGun;
-                    this.sprite = new PIXI.Sprite(main_1.load.loadUnboardered("guns", "waterGun"));
-                    this.shotAudio = new Audio("res/laser.mp3");
-                    break;
             }
             this.sprite.pivot = new PIXI.Point(gun.handle.x, gun.handle.y);
             this.fireRate = gun.fireRate;
@@ -545,13 +535,13 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             if (exports.p1.hitbox.getCenter().x < keyboard_1.default.mouseX) {
                 if (exports.p1.hitbox.getCenter().y < keyboard_1.default.mouseY) {
                     this.sprite.scale.x = 1;
-                    this.sprite.x = exports.p1.hitbox.getX() + exports.p1.hitbox.getWidth();
+                    this.sprite.x = exports.p1.hitbox.x + exports.p1.hitbox.width;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
                     this.sprite.rotation = shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
                 else {
                     this.sprite.scale.x = -1;
-                    this.sprite.x = exports.p1.hitbox.getX() + exports.p1.hitbox.getWidth();
+                    this.sprite.x = exports.p1.hitbox.x + exports.p1.hitbox.width;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
                     this.sprite.rotation = Math.PI + shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
@@ -559,13 +549,13 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             else {
                 if (exports.p1.hitbox.getCenter().y < keyboard_1.default.mouseY) {
                     this.sprite.scale.x = -1;
-                    this.sprite.x = exports.p1.hitbox.getX();
+                    this.sprite.x = exports.p1.hitbox.x;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
                     this.sprite.rotation = Math.PI + shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
                 else {
                     this.sprite.scale.x = 1;
-                    this.sprite.x = exports.p1.hitbox.getX();
+                    this.sprite.x = exports.p1.hitbox.x;
                     this.sprite.y = exports.p1.hitbox.getCenter().y;
                     this.sprite.rotation = shapes_1.rectangle.getAngle(new PIXI.Point(this.sprite.x, this.sprite.y), new PIXI.Point(keyboard_1.default.mouseX, keyboard_1.default.mouseY));
                 }
@@ -587,6 +577,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                             new bullet(this.getBarrelPoistion().x, this.getBarrelPoistion().y, this.getShotAngle(), this.shotCooldown, this.bulletType, this.fireSpeed, this.dammage, false);
                         }
                         this.shotAudio.currentTime = 0;
+                        this.shotAudio.play();
                         this.shotCooldown += this.fireRate;
                         this.currentLoad--;
                         this.currentRounds--;
@@ -693,7 +684,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                 this.dx *= Math.pow(0.9, deltaTime);
                 this.dy *= Math.pow(0.9, deltaTime);
                 walls.forEach(e => {
-                    if (e.intersect(new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height, 0))) {
+                    if (e.intersects(new shapes_1.rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height))) {
                         this.dx *= -1.1;
                         this.dy *= -1.1;
                     }
@@ -870,7 +861,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     exports.backGroundImage.addChild(bufferSprite);
                 }
             }
-            walls.push(new shapes_1.rectangle(x, y, w, h, 0));
+            walls.push(new shapes_1.rectangle(x, y, w, h));
         }
         static getCelingTexture() {
             if (Math.random() < 0.33) {
@@ -926,7 +917,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
         }
         animate(timeDelta) {
             this.animations.forEach(anim => {
-                if (this.time - anim.startTime > anim.frames) {
+                if (this.time - anim.startTime > anim.img.length) {
                     this.removeAnimation.push(anim);
                 }
             });
@@ -937,7 +928,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.removeAnimation = Array();
             this.time += timeDelta;
             this.animations.forEach(anim => {
-                anim.animate(this.time);
+                anim.sprite.texture = anim.img[Math.max(Math.min(Math.floor(this.time - anim.startTime), anim.img.length - 1), 0)];
             });
         }
     }
@@ -1007,32 +998,11 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
                     this.img.push(main_1.load.loadUnboardered("bullets", "nailExp6"));
                     this.img.push(main_1.load.loadUnboardered("bullets", "nailExp7"));
                     break;
-                case 6:
-                    this.img.push(main_1.load.loadBoardered("UIElements", "brokenHeart1"));
-                    this.img.push(main_1.load.loadBoardered("UIElements", "brokenHeart2"));
-                    this.img.push(main_1.load.loadBoardered("UIElements", "brokenHeart3"));
-                    this.img.push(main_1.load.loadBoardered("UIElements", "brokenHeart4"));
-                    this.img.push(main_1.load.loadBoardered("UIElements", "brokenHeart5"));
-                    this.img.push(main_1.load.loadBoardered("UIElements", "brokenHeart6"));
-                    break;
             }
             this.frames = this.img.length;
         }
-        animate(time) {
-            this.sprite.texture = this.img[Math.max(Math.min(Math.floor(time - this.startTime), this.img.length - 1), 0)];
-        }
         remove() {
             exports.foreGroundImage.removeChild(this.sprite);
-        }
-    }
-    class fadeAnim extends animation {
-        constructor(x, y, type, time, angle, fadeTime) {
-            super(x, y, type, time, angle);
-            this.frames += fadeTime;
-        }
-        animate(time) {
-            this.sprite.texture = this.img[Math.max(Math.min(Math.floor(time - this.startTime), this.img.length - 1), 0)];
-            this.sprite.alpha = Math.max(Math.min(1, time - this.startTime - this.img.length + 1, 0));
         }
     }
     class UIObject {
@@ -1100,7 +1070,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             });
         }
         getBounds() {
-            return new shapes_1.rectangle(this.x, this.y, this.getWidth(false), 15, 0);
+            return new shapes_1.rectangle(this.x, this.y, this.getWidth(false), 15);
         }
         remove() {
             this.sprites.forEach(spr => {
@@ -1149,7 +1119,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.calculatePositions();
         }
         getBounds() {
-            return new shapes_1.rectangle(this.x, this.y, this.width, 39, 0);
+            return new shapes_1.rectangle(this.x, this.y, this.width, 39);
         }
         remove() {
             this.numerator.remove();
@@ -1202,7 +1172,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.y = y;
         }
         getBounds() {
-            return new shapes_1.rectangle(0, 0, 0, 0, 0);
+            return new shapes_1.rectangle(0, 0, 0, 0);
         }
         remove() {
             UIImage.removeChild(this.line);
@@ -1273,7 +1243,7 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             this.y = y;
         }
         getBounds() {
-            return new shapes_1.rectangle(this.x, this.y, this.length, 20, 0);
+            return new shapes_1.rectangle(this.x, this.y, this.length, 20);
         }
         remove() {
             UIImage.removeChild(this.allImages);
