@@ -141,9 +141,9 @@ class player extends gameObject{
         this.x+=this.mov.x*deltaTime;
         this.y+=this.mov.y*deltaTime;
         this.hitbox = this.hitbox.translateAbsolute(this.x, this.y);
-        this.collision();
         this.sprite.x = this.x;
         this.sprite.y = this.y;
+        this.collision(deltaTime);
         if(!this.invincible){
             this.bulletCollision();
         }
@@ -246,34 +246,13 @@ class player extends gameObject{
         }
         this.guns[this.currentGun].update(deltaTime);
     }
-    collision(){
-        let collisionRects: rectangle[] = [];
+    collision(deltaTime: number){
+        let collisionRects: rectangle[] = new Array<rectangle>();
         walls.forEach(r => {
             if(r.intersect(this.hitbox)){
                 collisionRects.push(r);
             }
         });
-        collisionRects.forEach(rect=>{
-            let bot,top,left,right;
-            bot = this.y-(rect.getY()+rect.getHeight());
-            top = rect.getY()-(this.y+this.hitbox.getHeight());
-            left = rect.getX()-(this.x+this.hitbox.getWidth());
-            right = this.x-(rect.getX()+rect.getWidth());
-            let penetrate = Math.max(bot,top,left,right);
-            if(bot == penetrate){
-                this.y-=bot;
-            }
-            if(top == penetrate){
-                this.y+=top;
-            }
-            if(left == penetrate){
-                this.x+=penetrate;
-            }
-            if(right == penetrate){
-                this.x-=penetrate;
-            }
-        });
-        /*
         collisionRects.forEach(r => {
             if(this.mov.x*deltaTime>0) {
                 if ((this.x+this.hitbox.getWidth())-r.x < this.mov.x*2*deltaTime&&!(r.y+this.mov.y*deltaTime>=this.y+this.hitbox.getWidth()||r.y+r.height-this.mov.y*deltaTime<=this.y)) {//right
@@ -299,8 +278,7 @@ class player extends gameObject{
                     this.mov.set(this.mov.x,0);
                 }
             }
-        });*/
-
+        });
     }
     destroy(){
         super.destroy();
@@ -330,7 +308,7 @@ class bullet extends gameObject{
         this.sprite.y = y-this.sprite.height/2;
         this.x = x;
         this.y = y;
-        this.hitbox = new rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height,heading);
+        this.hitbox = new rectangle(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height,0);
         this.heading = heading;
         this.dammage = dammage;
         this.speed = speed; 
