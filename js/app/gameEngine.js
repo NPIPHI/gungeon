@@ -58,12 +58,6 @@ define(["require", "exports", "./shapes", "./keyboard", "./gameObject", "./enemy
             if (keyboard_1.default.getKey(37)) {
                 timeDilate *= 0.99;
             }
-            if (keyboard_1.default.getToggle(32)) {
-                exports.currentRoom.compress();
-            }
-            if (keyboard_1.default.getToggle(76)) {
-                exports.currentRoom.uncompress();
-            }
             keyboard_1.default.resetToggle();
         }
         generateFloor() {

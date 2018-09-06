@@ -67,12 +67,12 @@ export class gameEngine{
         if(keyboard.getKey(37)){
             timeDilate*=0.99;
         }
-        if(keyboard.getToggle(32)){
+        /*if(keyboard.getToggle(32)){
             currentRoom.compress();
         }
         if(keyboard.getToggle(76)){
             currentRoom.uncompress();
-        }
+        }*/
         keyboard.resetToggle();
     }
     generateFloor(){
